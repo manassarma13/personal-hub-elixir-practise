@@ -1,0 +1,22 @@
+# This file tells Docker which files to ignore when building the image.
+.dockerignore
+.git
+.gitignore
+
+# Ignore build artifacts
+_build/
+deps/
+
+# Ignore node artifacts
+apps/personal_hub_web/assets/node_modules/
+
+# Ignore database files
+*.db
+*.db-*
+
+# Ignore test files
+test/
+
+# Ignore IDE files
+.elixir_ls/
+.vscode/
