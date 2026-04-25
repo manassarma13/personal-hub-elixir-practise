@@ -145,9 +145,11 @@ defmodule PersonalHubWeb.TypingLive.Index do
     ~H"""
     <Layouts.app flash={@flash}>
       <div class="max-w-3xl mx-auto space-y-6">
-        <.link navigate={~p"/"} class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-          <.icon name="hero-arrow-left" class="size-4" />
-          Dashboard
+        <.link
+          navigate={~p"/"}
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          <.icon name="hero-arrow-left" class="size-4" /> Dashboard
         </.link>
 
         <div class="flex items-center justify-between">
@@ -156,8 +158,7 @@ defmodule PersonalHubWeb.TypingLive.Index do
             phx-click="reset"
             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            <.icon name="hero-arrow-path" class="size-4" />
-            New Text
+            <.icon name="hero-arrow-path" class="size-4" /> New Text
           </button>
         </div>
 
@@ -181,7 +182,9 @@ defmodule PersonalHubWeb.TypingLive.Index do
           </div>
 
           <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-            <p class="text-3xl font-bold text-gray-900 tabular-nums">{@correct_chars + @error_chars}</p>
+            <p class="text-3xl font-bold text-gray-900 tabular-nums">
+              {@correct_chars + @error_chars}
+            </p>
             <p class="text-xs text-gray-500 mt-1">Characters</p>
           </div>
         </div>
@@ -220,7 +223,9 @@ defmodule PersonalHubWeb.TypingLive.Index do
         <% else %>
           <div class="bg-white rounded-2xl border border-gray-200 p-6">
             <%= if @status == :idle do %>
-              <p class="text-xs text-center text-gray-400 mb-4">Click inside the text area below and start typing to begin</p>
+              <p class="text-xs text-center text-gray-400 mb-4">
+                Click inside the text area below and start typing to begin
+              </p>
             <% end %>
 
             <div class="relative rounded-xl bg-gray-50 p-5 cursor-text" id="text-display">
@@ -231,13 +236,15 @@ defmodule PersonalHubWeb.TypingLive.Index do
                     "relative"
                   ]}>
                     <%= if cursor_here?(@typed_text, idx) do %>
-                      <span class="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-800 animate-pulse"></span>
+                      <span class="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-800 animate-pulse">
+                      </span>
                     <% end %>
                     {if char == " ", do: "\u00A0", else: char}
                   </span>
                 <% end %>
                 <%= if cursor_here?(@typed_text, String.length(@target_text)) do %>
-                  <span class="inline-block w-0.5 h-5 bg-gray-800 animate-pulse align-text-bottom"></span>
+                  <span class="inline-block w-0.5 h-5 bg-gray-800 animate-pulse align-text-bottom">
+                  </span>
                 <% end %>
               </p>
 

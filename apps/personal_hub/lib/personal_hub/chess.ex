@@ -17,10 +17,18 @@ defmodule PersonalHub.Chess do
   }
 
   def new_board do
-    white_rank = for {piece, col} <- Enum.with_index(@initial_rank), into: %{}, do: {{0, col}, {:white, piece}}
+    white_rank =
+      for {piece, col} <- Enum.with_index(@initial_rank),
+          into: %{},
+          do: {{0, col}, {:white, piece}}
+
     white_pawns = for col <- 0..7, into: %{}, do: {{1, col}, {:white, :pawn}}
     black_pawns = for col <- 0..7, into: %{}, do: {{6, col}, {:black, :pawn}}
-    black_rank = for {piece, col} <- Enum.with_index(@initial_rank), into: %{}, do: {{7, col}, {:black, piece}}
+
+    black_rank =
+      for {piece, col} <- Enum.with_index(@initial_rank),
+          into: %{},
+          do: {{7, col}, {:black, piece}}
 
     white_rank |> Map.merge(white_pawns) |> Map.merge(black_pawns) |> Map.merge(black_rank)
   end
@@ -187,8 +195,14 @@ defmodule PersonalHub.Chess do
 
   defp attack_squares(_board, {row, col}, _color, :knight) do
     [
-      {row + 2, col + 1}, {row + 2, col - 1}, {row - 2, col + 1}, {row - 2, col - 1},
-      {row + 1, col + 2}, {row + 1, col - 2}, {row - 1, col + 2}, {row - 1, col - 2}
+      {row + 2, col + 1},
+      {row + 2, col - 1},
+      {row - 2, col + 1},
+      {row - 2, col - 1},
+      {row + 1, col + 2},
+      {row + 1, col - 2},
+      {row - 1, col + 2},
+      {row - 1, col - 2}
     ]
     |> Enum.filter(&on_board?/1)
   end

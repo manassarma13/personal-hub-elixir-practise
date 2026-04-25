@@ -17,13 +17,50 @@ if config_env() == :prod do
   # to check this value into version control, so we use an environment
   # variable instead.
   secret_key_base =
-    System.get_env("SECRET_KEY_BASE") ||
-      raise """
-      environment variable SECRET_KEY_BASE is missing.
-      You can generate one by calling: mix phx.gen.secret
-      """
+    case System.get_env("SECRET_KEY_BASE") do
+      nil ->
+        raise """
+        environment variable SECRET_KEY_BASE is missing.
+        Generate one: mix phx.gen.secret
+        """
+
+      key when byte_size(key) < 64 ->
+        raise """
+        SECRET_KEY_BASE must be at least 64 bytes (Plug cookie sessions). Got #{byte_size(key)} bytes.
+        Generate a valid secret: mix phx.gen.secret
+        """
+
+      key ->
+        key
+    end
+
+  # Public browser URL (scheme/host/port). Used for URL generation and
+  # WebSocket/LiveView check_origin. Must match how users open the app.
+  #
+  # Real deploy (TLS at proxy): defaults — PHX_SCHEME=https, PHX_PUBLIC_PORT=443
+  # Local Docker / plain HTTP: PHX_SCHEME=http PHX_PUBLIC_PORT=4000 PHX_HOST=localhost
+  phx_host = System.get_env("PHX_HOST") || "example.com"
+  phx_scheme = System.get_env("PHX_SCHEME") || "https"
+
+  phx_public_port =
+    case System.get_env("PHX_PUBLIC_PORT") do
+      nil -> if(phx_scheme == "https", do: 443, else: 80)
+      p -> String.to_integer(p)
+    end
+
+  check_origin =
+    if phx_scheme == "http" and phx_host in ["localhost", "127.0.0.1"] do
+      [
+        "http://localhost:#{phx_public_port}",
+        "http://127.0.0.1:#{phx_public_port}"
+      ]
+    else
+      true
+    end
 
   config :personal_hub_web, PersonalHubWeb.Endpoint,
+    url: [host: phx_host, scheme: phx_scheme, port: phx_public_port],
+    check_origin: check_origin,
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.

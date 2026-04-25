@@ -81,6 +81,28 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
+// Close nav <details> menus on LiveView navigation (hover/focus CSS alone stayed "open" after patch)
+const closeAppHeaderDetails = () => {
+  document.querySelectorAll("#app-header details[open]").forEach((d) => d.removeAttribute("open"))
+}
+window.addEventListener("phx:page-loading-start", closeAppHeaderDetails)
+window.addEventListener("phx:page-loading-stop", closeAppHeaderDetails)
+
+// Only one app-header menu open at a time
+document.addEventListener(
+  "toggle",
+  (e) => {
+    const t = e.target
+    if (t.nodeName !== "DETAILS" || !t.open) return
+    const header = t.closest("#app-header")
+    if (!header) return
+    header.querySelectorAll("details[open]").forEach((d) => {
+      if (d !== t) d.removeAttribute("open")
+    })
+  },
+  true
+)
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 

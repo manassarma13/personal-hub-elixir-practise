@@ -46,6 +46,9 @@ defmodule PersonalHubWeb.Router do
 
     # Typing Game
     live "/typing", TypingLive.Index, :index
+
+    # Drop — Ephemeral text sharing
+    live "/drop", DropLive.Index, :index
   end
 
   # Enable LiveDashboard in development

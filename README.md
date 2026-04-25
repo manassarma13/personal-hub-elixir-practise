@@ -1,207 +1,172 @@
-# Personal Hub — Elixir Fullstack Application
+# Personal Hub
 
-A fullstack Elixir application built as an **umbrella project** using **Phoenix LiveView** for a rich, real-time UI — with **zero JavaScript frameworks** and **no database server**. All user content (posts, notes, tasks) is persisted in the browser via **localStorage**, while server-side features like multiplayer chess use Elixir's OTP primitives.
+A fullstack Elixir umbrella application powered by Phoenix LiveView — delivering 10 real-time features with zero JavaScript frameworks, zero npm dependencies, and no database server.
 
-## What Is This?
-
-A Swiss Army knife for your personal stuff — 9 features in one app:
-
-- **Dashboard** — Overview of all features at a glance
-- **Blog** — Write and publish blog posts with relative timestamps
-- **Notes** — Quick notes with pin/unpin support, grid layout
-- **Tasks** — Todo list with priorities (low/medium/high), statuses (todo/in-progress/done), and due dates
-- **Kanban Board** — Kanban view + monthly calendar showing all tasks, posts, and notes
-- **Document Viewer** — Upload and view PDF, XLSX, DOCX, PPTX files directly in the browser
-- **Data Visualization** — Interactive charts (bar, line, pie, doughnut, radar, scatter, heatmap) with demo datasets and JSON upload
-- **Chess** — Real-time multiplayer chess with game codes, in-game chat, powered by GenServer + PubSub
-- **Typing Game** — 60-second WPM speed test with live accuracy feedback
-
-## Architecture
-
-This is an **umbrella project** with 2 apps:
-
-```
-personal-hub-elixir-practise/
-├── apps/
-│   ├── personal_hub/                  # Core business logic
-│   │   └── lib/personal_hub/
-│   │       ├── application.ex         # OTP supervisor (PubSub, Registry, DynamicSupervisor)
-│   │       ├── chess.ex               # Chess game logic (moves, validation, check/checkmate)
-│   │       ├── chess/game_server.ex   # GenServer for managing game state
-│   │       └── document_parser.ex     # PDF/XLSX/DOCX/PPTX parsing with Erlang :zip/:xmerl
-│   │
-│   └── personal_hub_web/             # Phoenix web layer
-│       ├── assets/
-│       │   ├── js/app.js              # LocalStore hook (localStorage bridge)
-│       │   ├── css/app.css            # Tailwind CSS v4
-│       │   └── vendor/chart.js        # Chart.js 4.4.7 (vendored)
-│       └── lib/personal_hub_web/
-│           ├── components/            # Layouts, CoreComponents
-│           ├── helpers/               # TimeHelpers (relative time formatting)
-│           └── live/                  # All LiveViews
-│               ├── dashboard_live.ex
-│               ├── post_live/         # Blog (index + show)
-│               ├── note_live/         # Notes
-│               ├── task_live/         # Tasks
-│               ├── kanban_live/       # Kanban + Calendar
-│               ├── chess_live/        # Multiplayer chess
-│               ├── document_live/     # Document viewer
-│               ├── visualize_live/    # Data visualization
-│               └── typing_live/       # Typing speed game
-├── config/                            # Environment configs (dev, test, prod)
-├── README.md
-├── Project.md
-└── pitch.md
-```
-
-### How It Works
-
-```
-┌─────────────────────────────────────────────────────┐
-│                     Browser                         │
-│                                                     │
-│  localStorage ◄──► LocalStore JS Hook ◄──► LiveView │
-│  (posts, notes,    (phx-hook bridge)       (Elixir) │
-│   tasks)                                            │
-└───────────────────────┬─────────────────────────────┘
-                        │ WebSocket
-┌───────────────────────▼─────────────────────────────┐
-│                Phoenix Server                       │
-│                                                     │
-│  PubSub ──── GenServer (Chess) ──── Registry        │
-│              DynamicSupervisor                      │
-│              DocumentParser (zip/xmerl)             │
-└─────────────────────────────────────────────────────┘
-```
-
-- **Content (Posts/Notes/Tasks)** — stored in browser localStorage, synced to LiveView via the `LocalStore` JS hook
-- **Chess** — server-side GenServer processes, real-time via PubSub
-- **Documents** — uploaded and parsed server-side, rendered in LiveView
-- **Charts** — Chart.js driven by LiveView hooks
+Content is persisted in the browser via localStorage. Server-side features like multiplayer chess and ephemeral text sharing leverage Elixir's OTP primitives (GenServer, DynamicSupervisor, Registry, PubSub) for lightweight, fault-tolerant concurrency.
 
 ## Features
 
-### Content Management (localStorage)
-- **Blog Posts** — Full CRUD with publish/draft status, relative timestamps ("5m ago"), edited indicators
-- **Notes** — Quick notes with pin/unpin, grid layout, relative timestamps
-- **Tasks** — Status transitions (todo → in_progress → done), priority levels (low/medium/high), due dates with overdue highlighting
+| Feature | Description | Storage |
+|---------|-------------|---------|
+| **Drop** | Ephemeral real-time text sharing between devices via 6-digit room codes | In-memory GenServer (auto-expires) |
+| **Blog** | Full CRUD with publish/draft, relative timestamps, edit history | Browser localStorage |
+| **Notes** | Quick notes with pin/unpin, responsive grid layout | Browser localStorage |
+| **Tasks** | Priority levels, status transitions, due dates with overdue alerts | Browser localStorage |
+| **Kanban Board** | Three-column board view + monthly calendar with color-coded items | Browser localStorage |
+| **Document Viewer** | Upload and render PDF, XLSX, DOCX, PPTX — parsed with Erlang stdlib | Server-side (ephemeral) |
+| **Data Visualization** | Bar, line, pie, doughnut, radar, scatter, heatmap charts via Chart.js | Server-side (ephemeral) |
+| **Chess** | Real-time multiplayer with game codes, move validation, in-game chat | GenServer per game |
+| **Typing Game** | 60-second WPM speed test with live accuracy tracking | Client-side |
+| **Dashboard** | Unified overview with stats, feature cards, and quick actions | — |
 
-### Kanban Board & Calendar
-- **Kanban view** — Three columns (Todo, In Progress, Done) with task counts and recent posts/notes sidebar
-- **Calendar view** — Monthly grid showing tasks by due date, posts and notes by creation date, color-coded legend
+## Architecture
 
-### Document Viewer
-- **PDF** — Native browser rendering via iframe
-- **XLSX** — Parsed with Erlang `:zip` and `:xmerl`, displayed as interactive tables with sheet tabs
-- **DOCX** — Text extraction from Word documents
-- **PPTX** — Slide-by-slide text extraction
-
-### Data Visualization
-Interactive Chart.js charts via LiveView hook — bar, line, pie, doughnut, radar, scatter, heatmap with demo datasets and JSON upload
-
-### Chess
-Real-time multiplayer chess — GenServer + DynamicSupervisor + Registry + PubSub — with game codes and in-game chat
-
-### Typing Game
-60-second WPM speed test using ColocatedHooks (Phoenix 1.8) for real-time keystroke tracking
-
-### OTP Patterns Used
-- **GenServer** — Chess game state management
-- **DynamicSupervisor** — Spawning game processes on demand
-- **Registry** — Looking up game processes by game code
-- **PubSub** — Broadcasting moves, chat messages, game events
-
-## How to Run
-
-```bash
-# Install dependencies
-mix setup
-
-# Start the server
-mix phx.server
+```
+personal-hub/
+├── apps/
+│   ├── personal_hub/                  # Core business logic (no web dependencies)
+│   │   └── lib/personal_hub/
+│   │       ├── application.ex         # OTP supervisor tree
+│   │       ├── chess.ex               # Chess engine (moves, validation, checkmate)
+│   │       ├── chess/game_server.ex   # GenServer per chess game
+│   │       ├── analytics.ex           # GenServer: session stats (bounded history)
+│   │       ├── drop/room_server.ex    # GenServer per Drop room (auto-expiry)
+│   │       └── document_parser.ex     # XLSX/DOCX/PPTX via Erlang :zip + :xmerl
+│   │
+│   └── personal_hub_web/             # Phoenix web layer
+│       ├── assets/
+│       │   ├── js/app.js              # LocalStore, ChartJS hooks; header nav closes on navigate
+│       │   ├── css/app.css            # Tailwind CSS v4
+│       │   └── vendor/chart.js        # Chart.js 4.4.7 (vendored, no npm)
+│       └── lib/personal_hub_web/
+│           ├── components/            # Layouts, CoreComponents
+│           ├── helpers/               # TimeHelpers (relative time formatting)
+│           ├── hooks/                 # LiveView on_mount (e.g. analytics)
+│           └── live/                  # LiveViews (feature modules)
+├── config/                            # Environment-specific configuration
+├── docker-compose.yml                 # Local prod-style run (loads .env)
+├── .env.example                       # Template for SECRET_KEY_BASE, PHX_*, PORT
+└── Dockerfile                         # Production-ready multi-stage build
 ```
 
-Visit [http://localhost:4000](http://localhost:4000)
+### Data Flow
 
-No database setup needed — content is stored in your browser's localStorage.
+```
+┌──────────────────────────────────────────────────────┐
+│                      Browser                          │
+│                                                       │
+│  localStorage ◄──► LocalStore JS Hook ◄──► LiveView   │
+│  (posts, notes,    (phx-hook bridge)       (Elixir)   │
+│   tasks)                                              │
+└────────────────────────┬──────────────────────────────┘
+                         │ WebSocket
+┌────────────────────────▼──────────────────────────────┐
+│                 Phoenix Server                         │
+│                                                        │
+│  PubSub ──── GenServer (Chess/Drop/Analytics) ──── Registry │
+│              DynamicSupervisor (process lifecycle)          │
+│              DocumentParser (Erlang :zip + :xmerl)          │
+└────────────────────────────────────────────────────────┘
+```
 
-## Pages & Routes
+### OTP Supervision Tree
 
-| Route | Page |
-|-------|------|
-| `/` | Dashboard |
-| `/posts` | Blog Posts |
-| `/posts/:id` | Post Detail |
-| `/notes` | Notes |
-| `/tasks` | Tasks |
-| `/kanban` | Kanban Board & Calendar |
-| `/documents` | Document Viewer |
-| `/visualize` | Data Visualization |
-| `/chess` | Multiplayer Chess |
-| `/typing` | Typing Game |
+```
+PersonalHub.Supervisor
+├── DNSCluster
+├── Phoenix.PubSub (PersonalHub.PubSub)
+├── Registry (PersonalHub.Chess.Registry)
+├── DynamicSupervisor (PersonalHub.Chess.GameSupervisor)
+├── Registry (PersonalHub.Drop.Registry)
+├── DynamicSupervisor (PersonalHub.Drop.RoomSupervisor)
+└── PersonalHub.Analytics
+```
+
+## Routes
+
+| Route | LiveView | Feature |
+|-------|----------|---------|
+| `/` | `DashboardLive` | Dashboard |
+| `/drop` | `DropLive.Index` | Drop (text sharing) |
+| `/posts` | `PostLive.Index` | Blog posts |
+| `/posts/:id` | `PostLive.Show` | Post detail |
+| `/notes` | `NoteLive.Index` | Notes |
+| `/tasks` | `TaskLive.Index` | Tasks |
+| `/kanban` | `KanbanLive.Index` | Kanban board + calendar |
+| `/documents` | `DocumentLive.Index` | Document viewer |
+| `/visualize` | `VisualizeLive.Index` | Data visualization |
+| `/chess` | `ChessLive.Index` | Multiplayer chess |
+| `/typing` | `TypingLive.Index` | Typing game |
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Language | Elixir 1.19 / Erlang OTP 28 |
+| Language | Elixir 1.19 / Erlang OTP (see `Dockerfile` pins, e.g. OTP 26.x) |
 | Web Framework | Phoenix 1.8 |
 | Real-time UI | Phoenix LiveView 1.1 |
-| Styling | Tailwind CSS v4 |
+| Styling | Tailwind CSS v4 + daisyUI |
 | Charts | Chart.js 4.4.7 (vendored) |
-| Data Storage | Browser localStorage (content) / OTP processes (chess) |
+| Persistence | Browser localStorage / OTP processes |
 | Document Parsing | Erlang `:zip` + `:xmerl` |
 | HTTP Client | Req |
+| HTTP Server | Bandit |
 
-## Deployment — Free Hosting
-
-Since there's no database, deployment is very simple. Only `SECRET_KEY_BASE` is needed.
-
-### Option 1: Fly.io (recommended)
+## Getting Started
 
 ```bash
-# Install Fly CLI
-curl -L https://fly.io/install.sh | sh
+# Install dependencies
+mix setup
 
-# Login & launch
-fly auth signup
-fly launch
-
-# Set the secret
-fly secrets set SECRET_KEY_BASE=$(mix phx.gen.secret)
-
-# Deploy
-fly deploy
+# Start the development server
+mix phx.server
 ```
 
-No volumes, no database config, no migrations needed.
+Open [http://localhost:4000](http://localhost:4000). No database setup required.
 
-### Option 2: Gigalixir (free tier)
+Optional project-root **`.env`**: `config/dev.exs` loads it so you can set `SECRET_KEY_BASE` or other vars without exporting them in the shell. Copy **`.env.example`** to **`.env`** and edit.
+
+If **port 4000 is already in use** (e.g. Docker still running), stop the other process or run:
 
 ```bash
-pip install gigalixir
-gigalixir signup
-gigalixir login
-gigalixir create
-git push gigalixir main
+PORT=4001 mix phx.server
 ```
-
-### Option 3: Render
-
-Create a new **Web Service** on [render.com](https://render.com), connect your GitHub repo, and set:
-- **Build Command**: `mix deps.get && mix assets.deploy && mix release`
-- **Start Command**: `_build/prod/rel/personal_hub/bin/personal_hub start`
-- **Environment Variable**: `SECRET_KEY_BASE`
 
 ## Development
 
 ```bash
-# Run all checks before committing
+# Compile, format, and run tests (run before every commit)
 mix precommit
 
 # Run tests
 mix test
 
-# Run previously failed tests
+# Run previously failed tests only
 mix test --failed
 ```
+
+## Deployment
+
+**Required in production:** `SECRET_KEY_BASE` (at least 64 bytes — use `mix phx.gen.secret`).
+
+**Recommended:** `PHX_HOST` (public hostname). For HTTP behind no TLS (e.g. local Docker), set `PHX_SCHEME=http`, `PHX_PUBLIC_PORT`, and `PORT` to match the URL users open (see **`config/runtime.exs`** and **`.env.example`**).
+
+No database, no volumes, no migrations.
+
+```bash
+# Generate a secret
+mix phx.gen.secret
+```
+
+**Docker:** build with the [Dockerfile](./Dockerfile), or from the repo root:
+
+```bash
+cp .env.example .env   # then set SECRET_KEY_BASE and any overrides
+docker compose up --build
+```
+
+Refer to **`Ship.md`** (local-only; not in git if you keep it untracked) for VPS notes if you use that workflow.
+
+## License
+
+Private project. All rights reserved.

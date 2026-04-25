@@ -108,12 +108,13 @@ defmodule PersonalHub.Chess.GameServer do
                   _ -> {:playing, nil}
                 end
 
-              new_state = %{state |
-                board: new_board,
-                turn: next_turn,
-                status: new_status,
-                winner: winner,
-                moves: state.moves ++ [notation]
+              new_state = %{
+                state
+                | board: new_board,
+                  turn: next_turn,
+                  status: new_status,
+                  winner: winner,
+                  moves: state.moves ++ [notation]
               }
 
               broadcast(state.game_id, {:move_made, serialize(new_state)})

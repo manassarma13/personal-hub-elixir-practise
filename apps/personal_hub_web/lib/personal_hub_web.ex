@@ -52,6 +52,8 @@ defmodule PersonalHubWeb do
     quote do
       use Phoenix.LiveView
 
+      on_mount PersonalHubWeb.Hooks.Analytics
+
       unquote(html_helpers())
     end
   end

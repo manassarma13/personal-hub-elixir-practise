@@ -134,84 +134,117 @@ defmodule PersonalHubWeb.PostLive.Index do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-    <div id="local-store" phx-hook="LocalStore" phx-update="ignore" data-collections="posts"></div>
-    <div class="max-w-4xl mx-auto space-y-6">
-      <.link navigate={~p"/"} class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-        <.icon name="hero-arrow-left" class="size-4" />
-        Dashboard
-      </.link>
-
-      <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-semibold text-gray-900">{@page_title}</h1>
-        <.link navigate={~p"/posts/new"} class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors">
-          New Post
+      <div id="local-store" phx-hook="LocalStore" phx-update="ignore" data-collections="posts"></div>
+      <div class="max-w-4xl mx-auto space-y-6">
+        <.link
+          navigate={~p"/"}
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          <.icon name="hero-arrow-left" class="size-4" /> Dashboard
         </.link>
-      </div>
 
-      <%= if @live_action in [:new, :edit] and @form do %>
-        <div class="bg-white border border-gray-200 rounded-2xl p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-5">{@page_title}</h2>
-          <.form for={@form} id="post-form" phx-submit="save" class="space-y-5">
-            <.input field={@form[:title]} type="text" label="Title" required />
-            <.input field={@form[:body]} type="textarea" label="Body" rows="5" required />
-            <.input field={@form[:published]} type="checkbox" label="Published" />
-
-            <div class="flex items-center gap-3 pt-2">
-              <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors">
-                Save
-              </button>
-              <.link navigate={~p"/posts"} class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-                Cancel
-              </.link>
-            </div>
-          </.form>
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-semibold text-gray-900">{@page_title}</h1>
+          <.link
+            navigate={~p"/posts/new"}
+            class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors"
+          >
+            New Post
+          </.link>
         </div>
-      <% end %>
 
-      <div class="space-y-4">
-        <%= for post <- @posts do %>
-          <div class="bg-white border border-gray-200 rounded-2xl p-5">
-            <div class="flex justify-between items-start">
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2.5">
-                  <h2 class="text-base font-semibold text-gray-900 truncate">{post["title"]}</h2>
-                  <%= if post["published"] do %>
-                    <span class="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-50 text-green-700">Published</span>
-                  <% else %>
-                    <span class="rounded-full px-2.5 py-0.5 text-xs font-medium bg-amber-50 text-amber-700">Draft</span>
-                  <% end %>
-                </div>
-                <p class="mt-1.5 text-sm text-gray-500 line-clamp-2">{String.slice(post["body"] || "", 0..200)}</p>
-                <div class="flex items-center gap-3 mt-2">
-                  <span class="text-xs text-gray-400" title={format_datetime(post["inserted_at"])}>
-                    <.icon name="hero-clock" class="size-3 inline mr-0.5" />
-                    {relative_time(post["inserted_at"])}
-                  </span>
-                  <%= if post["updated_at"] do %>
-                    <span class="text-xs text-gray-400" title={format_datetime(post["updated_at"])}>
-                      edited {relative_time(post["updated_at"])}
-                    </span>
-                  <% end %>
-                </div>
+        <%= if @live_action in [:new, :edit] and @form do %>
+          <div class="bg-white border border-gray-200 rounded-2xl p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-5">{@page_title}</h2>
+            <.form for={@form} id="post-form" phx-submit="save" class="space-y-5">
+              <.input field={@form[:title]} type="text" label="Title" required />
+              <.input field={@form[:body]} type="textarea" label="Body" rows="5" required />
+              <.input field={@form[:published]} type="checkbox" label="Published" />
+
+              <div class="flex items-center gap-3 pt-2">
+                <button
+                  type="submit"
+                  class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors"
+                >
+                  Save
+                </button>
+                <.link
+                  navigate={~p"/posts"}
+                  class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                  Cancel
+                </.link>
               </div>
-              <div class="flex items-center gap-3 ml-4 shrink-0">
-                <.link navigate={~p"/posts/#{post["id"]}"} class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">View</.link>
-                <.link navigate={~p"/posts/#{post["id"]}/edit"} class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Edit</.link>
-                <button phx-click="delete" phx-value-id={post["id"]} class="text-sm font-medium text-red-500 hover:text-red-700 transition-colors"
-                  data-confirm="Are you sure?">Delete</button>
+            </.form>
+          </div>
+        <% end %>
+
+        <div class="space-y-4">
+          <%= for post <- @posts do %>
+            <div class="bg-white border border-gray-200 rounded-2xl p-5">
+              <div class="flex justify-between items-start">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2.5">
+                    <h2 class="text-base font-semibold text-gray-900 truncate">{post["title"]}</h2>
+                    <%= if post["published"] do %>
+                      <span class="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-50 text-green-700">
+                        Published
+                      </span>
+                    <% else %>
+                      <span class="rounded-full px-2.5 py-0.5 text-xs font-medium bg-amber-50 text-amber-700">
+                        Draft
+                      </span>
+                    <% end %>
+                  </div>
+                  <p class="mt-1.5 text-sm text-gray-500 line-clamp-2">
+                    {String.slice(post["body"] || "", 0..200)}
+                  </p>
+                  <div class="flex items-center gap-3 mt-2">
+                    <span class="text-xs text-gray-400" title={format_datetime(post["inserted_at"])}>
+                      <.icon name="hero-clock" class="size-3 inline mr-0.5" />
+                      {relative_time(post["inserted_at"])}
+                    </span>
+                    <%= if post["updated_at"] do %>
+                      <span class="text-xs text-gray-400" title={format_datetime(post["updated_at"])}>
+                        edited {relative_time(post["updated_at"])}
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 ml-4 shrink-0">
+                  <.link
+                    navigate={~p"/posts/#{post["id"]}"}
+                    class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    View
+                  </.link>
+                  <.link
+                    navigate={~p"/posts/#{post["id"]}/edit"}
+                    class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    Edit
+                  </.link>
+                  <button
+                    phx-click="delete"
+                    phx-value-id={post["id"]}
+                    class="text-sm font-medium text-red-500 hover:text-red-700 transition-colors"
+                    data-confirm="Are you sure?"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        <% end %>
+          <% end %>
 
-        <%= if @posts == [] do %>
-          <div class="text-center py-16">
-            <p class="text-lg font-medium text-gray-400">No posts yet</p>
-            <p class="mt-1 text-sm text-gray-400">Create your first blog post!</p>
-          </div>
-        <% end %>
+          <%= if @posts == [] do %>
+            <div class="text-center py-16">
+              <p class="text-lg font-medium text-gray-400">No posts yet</p>
+              <p class="mt-1 text-sm text-gray-400">Create your first blog post!</p>
+            </div>
+          <% end %>
+        </div>
       </div>
-    </div>
     </Layouts.app>
     """
   end

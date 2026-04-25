@@ -11,7 +11,10 @@ defmodule PersonalHub.Application do
       {DNSCluster, query: Application.get_env(:personal_hub, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: PersonalHub.PubSub},
       {Registry, keys: :unique, name: PersonalHub.Chess.Registry},
-      {DynamicSupervisor, name: PersonalHub.Chess.GameSupervisor, strategy: :one_for_one}
+      {DynamicSupervisor, name: PersonalHub.Chess.GameSupervisor, strategy: :one_for_one},
+      {Registry, keys: :unique, name: PersonalHub.Drop.Registry},
+      {DynamicSupervisor, name: PersonalHub.Drop.RoomSupervisor, strategy: :one_for_one},
+      PersonalHub.Analytics
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: PersonalHub.Supervisor)

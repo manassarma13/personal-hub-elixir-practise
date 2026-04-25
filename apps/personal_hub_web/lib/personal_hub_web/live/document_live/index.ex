@@ -72,96 +72,109 @@ defmodule PersonalHubWeb.DocumentLive.Index do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-    <div class="max-w-5xl mx-auto space-y-6">
-      <.link navigate={~p"/"} class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-        <.icon name="hero-arrow-left" class="size-4" />
-        Dashboard
-      </.link>
+      <div class="max-w-5xl mx-auto space-y-6">
+        <.link
+          navigate={~p"/"}
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          <.icon name="hero-arrow-left" class="size-4" /> Dashboard
+        </.link>
 
-      <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-semibold text-gray-900">Document Viewer</h1>
-        <%= if @parsed do %>
-          <button phx-click="clear" class="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
-            Upload New
-          </button>
-        <% end %>
-      </div>
-
-      <%= if @error do %>
-        <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
-          {@error}
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-semibold text-gray-900">Document Viewer</h1>
+          <%= if @parsed do %>
+            <button
+              phx-click="clear"
+              class="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              Upload New
+            </button>
+          <% end %>
         </div>
-      <% end %>
 
-      <%= if @parsed == nil do %>
-        <div class="bg-white border border-gray-200 rounded-2xl p-8">
-          <form id="upload-form" phx-submit="upload" phx-change="validate" class="space-y-6">
-            <div class="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-primary/50 transition-colors">
-              <.live_file_input upload={@uploads.document} class="hidden" />
-              <div class="space-y-3">
-                <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                  <.icon name="hero-document-arrow-up" class="size-8 text-gray-400" />
-                </div>
-                <div>
-                  <label for={@uploads.document.ref} class="text-sm font-medium text-primary cursor-pointer hover:underline">
-                    Choose a file
-                  </label>
-                  <p class="text-xs text-gray-400 mt-1">PDF, XLSX, DOCX, PPTX up to 20MB</p>
+        <%= if @error do %>
+          <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+            {@error}
+          </div>
+        <% end %>
+
+        <%= if @parsed == nil do %>
+          <div class="bg-white border border-gray-200 rounded-2xl p-8">
+            <form id="upload-form" phx-submit="upload" phx-change="validate" class="space-y-6">
+              <div class="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-primary/50 transition-colors">
+                <.live_file_input upload={@uploads.document} class="hidden" />
+                <div class="space-y-3">
+                  <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                    <.icon name="hero-document-arrow-up" class="size-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <label
+                      for={@uploads.document.ref}
+                      class="text-sm font-medium text-primary cursor-pointer hover:underline"
+                    >
+                      Choose a file
+                    </label>
+                    <p class="text-xs text-gray-400 mt-1">PDF, XLSX, DOCX, PPTX up to 20MB</p>
+                  </div>
                 </div>
               </div>
+
+              <%= for entry <- @uploads.document.entries do %>
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-4">
+                  <div class="flex items-center gap-3">
+                    <.icon name="hero-document" class="size-5 text-gray-400" />
+                    <span class="text-sm font-medium text-gray-700">{entry.client_name}</span>
+                    <span class="text-xs text-gray-400">{format_size(entry.client_size)}</span>
+                  </div>
+                  <div class="w-32 bg-gray-200 rounded-full h-1.5">
+                    <div
+                      class="bg-primary h-1.5 rounded-full transition-all"
+                      style={"width: #{entry.progress}%"}
+                    >
+                    </div>
+                  </div>
+                </div>
+                <%= for err <- upload_errors(@uploads.document, entry) do %>
+                  <p class="text-sm text-red-600">{upload_error_to_string(err)}</p>
+                <% end %>
+              <% end %>
+
+              <button
+                type="submit"
+                disabled={@uploads.document.entries == []}
+                class={[
+                  "w-full px-4 py-3 rounded-xl text-sm font-medium transition-colors",
+                  if(@uploads.document.entries == [],
+                    do: "bg-gray-100 text-gray-400 cursor-not-allowed",
+                    else: "bg-primary text-white hover:bg-primary/90"
+                  )
+                ]}
+              >
+                View Document
+              </button>
+            </form>
+          </div>
+        <% end %>
+
+        <%= if @parsed do %>
+          <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50">
+              <.icon name="hero-document" class="size-5 text-gray-400" />
+              <span class="text-sm font-semibold text-gray-900">{@filename}</span>
+              <span class={[
+                "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                file_type_badge(@parsed)
+              ]}>
+                {file_type_label(@parsed)}
+              </span>
             </div>
 
-            <%= for entry <- @uploads.document.entries do %>
-              <div class="flex items-center justify-between bg-gray-50 rounded-xl p-4">
-                <div class="flex items-center gap-3">
-                  <.icon name="hero-document" class="size-5 text-gray-400" />
-                  <span class="text-sm font-medium text-gray-700">{entry.client_name}</span>
-                  <span class="text-xs text-gray-400">{format_size(entry.client_size)}</span>
-                </div>
-                <div class="w-32 bg-gray-200 rounded-full h-1.5">
-                  <div class="bg-primary h-1.5 rounded-full transition-all" style={"width: #{entry.progress}%"}></div>
-                </div>
-              </div>
-              <%= for err <- upload_errors(@uploads.document, entry) do %>
-                <p class="text-sm text-red-600">{upload_error_to_string(err)}</p>
-              <% end %>
-            <% end %>
-
-            <button
-              type="submit"
-              disabled={@uploads.document.entries == []}
-              class={[
-                "w-full px-4 py-3 rounded-xl text-sm font-medium transition-colors",
-                if(@uploads.document.entries == [],
-                  do: "bg-gray-100 text-gray-400 cursor-not-allowed",
-                  else: "bg-primary text-white hover:bg-primary/90")
-              ]}
-            >
-              View Document
-            </button>
-          </form>
-        </div>
-      <% end %>
-
-      <%= if @parsed do %>
-        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50">
-            <.icon name="hero-document" class="size-5 text-gray-400" />
-            <span class="text-sm font-semibold text-gray-900">{@filename}</span>
-            <span class={[
-              "rounded-full px-2.5 py-0.5 text-xs font-medium",
-              file_type_badge(@parsed)
-            ]}>
-              {file_type_label(@parsed)}
-            </span>
+            <div class="p-6">
+              {render_document(assigns)}
+            </div>
           </div>
-
-          <div class="p-6">
-            {render_document(assigns)}
-          </div>
-        </div>
-      <% end %>
-    </div>
+        <% end %>
+      </div>
     </Layouts.app>
     """
   end
@@ -197,7 +210,8 @@ defmodule PersonalHubWeb.DocumentLive.Index do
                 "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
                 if(idx == @active_sheet,
                   do: "border-primary text-primary",
-                  else: "border-transparent text-gray-500 hover:text-gray-700")
+                  else: "border-transparent text-gray-500 hover:text-gray-700"
+                )
               ]}
             >
               {s.name}
@@ -211,10 +225,17 @@ defmodule PersonalHubWeb.DocumentLive.Index do
           <table class="w-full text-sm">
             <tbody>
               <%= for {row, row_idx} <- Enum.with_index(@sheet.rows) do %>
-                <tr class={if(row_idx == 0, do: "bg-gray-50 font-semibold", else: "border-b border-gray-50 hover:bg-gray-50")}>
+                <tr class={
+                  if(row_idx == 0,
+                    do: "bg-gray-50 font-semibold",
+                    else: "border-b border-gray-50 hover:bg-gray-50"
+                  )
+                }>
                   <td class="px-2 py-1.5 text-xs text-gray-400 w-8">{row_idx + 1}</td>
                   <%= for cell <- row do %>
-                    <td class="px-3 py-1.5 text-gray-700 border-r border-gray-100 whitespace-nowrap">{cell}</td>
+                    <td class="px-3 py-1.5 text-gray-700 border-r border-gray-100 whitespace-nowrap">
+                      {cell}
+                    </td>
                   <% end %>
                 </tr>
               <% end %>

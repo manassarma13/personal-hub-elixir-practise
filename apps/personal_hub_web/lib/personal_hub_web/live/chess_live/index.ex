@@ -45,7 +45,9 @@ defmodule PersonalHubWeb.ChessLive.Index do
 
     case GameServer.create_game(game_id) do
       {:ok, _pid} ->
-        {:ok, color} = GameServer.join(game_id, socket.assigns.player_id, socket.assigns.player_name)
+        {:ok, color} =
+          GameServer.join(game_id, socket.assigns.player_id, socket.assigns.player_name)
+
         Phoenix.PubSub.subscribe(PersonalHub.PubSub, "chess:#{game_id}")
         game = GameServer.get_state(game_id)
 
@@ -208,7 +210,8 @@ defmodule PersonalHubWeb.ChessLive.Index do
     do: "text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.8),0_0_8px_rgba(0,0,0,0.3)]"
 
   defp piece_text_color({:black, _}),
-    do: "text-gray-950 [text-shadow:0_1px_2px_rgba(255,255,255,0.6),0_0_6px_rgba(255,255,255,0.3)]"
+    do:
+      "text-gray-950 [text-shadow:0_1px_2px_rgba(255,255,255,0.6),0_0_6px_rgba(255,255,255,0.3)]"
 
   defp piece_text_color(_), do: ""
 
@@ -218,7 +221,9 @@ defmodule PersonalHubWeb.ChessLive.Index do
 
   defp status_text(%{status: :waiting}), do: "Waiting for opponent..."
   defp status_text(%{status: :finished, winner: nil}), do: "Stalemate!"
-  defp status_text(%{status: :finished, winner: color}), do: "#{String.capitalize(to_string(color))} wins!"
+
+  defp status_text(%{status: :finished, winner: color}),
+    do: "#{String.capitalize(to_string(color))} wins!"
 
   defp status_text(%{status: :playing, turn: turn, board: board}) do
     check_text = if Chess.in_check?(board, turn), do: " — Check!", else: ""
@@ -229,221 +234,262 @@ defmodule PersonalHubWeb.ChessLive.Index do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-    <div class="max-w-4xl mx-auto space-y-6">
-      <.link navigate={~p"/"} class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-        <.icon name="hero-arrow-left" class="size-4" />
-        Dashboard
-      </.link>
+      <div class="max-w-4xl mx-auto space-y-6">
+        <.link
+          navigate={~p"/"}
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          <.icon name="hero-arrow-left" class="size-4" /> Dashboard
+        </.link>
 
-      <h1 class="text-2xl font-semibold text-gray-900">Chess</h1>
+        <h1 class="text-2xl font-semibold text-gray-900">Chess</h1>
 
-      <%= cond do %>
-        <% @screen == :lobby -> %>
-          <div class="max-w-md mx-auto">
-            <div class="bg-white border border-gray-200 rounded-2xl p-8 text-center space-y-6">
-              <div class="text-6xl">♟</div>
-              <h2 class="text-xl font-semibold text-gray-900">Enter Your Name</h2>
-              <p class="text-sm text-gray-500">If your name matches a registered user, your account will be linked</p>
-              <form phx-submit="set_name" class="space-y-4">
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Your name..."
-                  required
-                  class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                />
-                <button type="submit" class="w-full px-4 py-3 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors">
-                  Continue
-                </button>
-              </form>
-            </div>
-          </div>
-
-        <% @screen == :menu -> %>
-          <div class="max-w-md mx-auto space-y-4">
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center">
-              <p class="text-sm text-gray-500">Playing as</p>
-              <p class="text-lg font-semibold text-gray-900">{@player_name}</p>
-            </div>
-
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
-              <h3 class="text-lg font-semibold text-gray-900">Create New Game</h3>
-              <p class="text-sm text-gray-500">Start a game and share the code with your opponent</p>
-              <button phx-click="create_game" class="w-full px-4 py-3 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors">
-                Create Game
-              </button>
-            </div>
-
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
-              <h3 class="text-lg font-semibold text-gray-900">Join Game</h3>
-              <p class="text-sm text-gray-500">Enter a game code to join your opponent</p>
-              <form phx-submit="join_game" class="flex gap-2">
-                <input
-                  type="text"
-                  name="code"
-                  value={@join_code}
-                  phx-keyup="update_join_code"
-                  phx-value-code=""
-                  placeholder="Game code..."
-                  required
-                  maxlength="6"
-                  class="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase tracking-widest text-center font-mono"
-                />
-                <button type="submit" class="px-6 py-3 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors">
-                  Join
-                </button>
-              </form>
-            </div>
-          </div>
-
-        <% @screen == :game and @game != nil -> %>
-          <div class="flex flex-col lg:flex-row gap-6 items-start">
-            <div class="flex-1 w-full lg:w-auto">
-              <div class="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
-                <div class="flex justify-between items-center mb-4">
-                  <div>
-                    <span class="text-sm font-medium text-gray-500">Game</span>
-                    <span class="ml-2 font-mono text-lg font-bold tracking-widest text-primary">{@game_id}</span>
-                  </div>
-                  <span class={[
-                    "rounded-full px-3 py-1 text-xs font-medium",
-                    if(@game.status == :playing, do: "bg-green-50 text-green-700", else: "bg-gray-100 text-gray-600")
-                  ]}>
-                    {status_text(@game)}
-                  </span>
-                </div>
-
-                <div class="flex justify-center">
-                  <div class="inline-block border-2 border-[#6d4c2a] rounded-lg overflow-hidden shadow-lg">
-                    <%= for row <- board_rows(@player_color) do %>
-                      <div class="flex">
-                        <div class="w-5 sm:w-6 flex items-center justify-center text-xs text-gray-400 font-mono">
-                          {row + 1}
-                        </div>
-                        <%= for col <- 0..7 do %>
-                          <button
-                            phx-click="select_square"
-                            phx-value-row={row}
-                            phx-value-col={col}
-                            class={[
-                              "w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center text-2xl sm:text-3xl md:text-4xl cursor-pointer transition-all duration-100 select-none",
-                              square_color(row, col),
-                              @selected == {row, col} && "ring-2 ring-inset ring-blue-500 bg-blue-300/60",
-                              {row, col} in @valid_moves && "ring-2 ring-inset ring-emerald-400 bg-emerald-200/50",
-                              piece_text_color(Map.get(@game.board, {row, col}))
-                            ]}
-                          >
-                            {Chess.piece_symbol(Map.get(@game.board, {row, col}))}
-                          </button>
-                        <% end %>
-                      </div>
-                    <% end %>
-                    <div class="flex">
-                      <div class="w-5 sm:w-6"></div>
-                      <%= for col <- 0..7 do %>
-                        <div class="w-10 sm:w-12 md:w-14 text-center text-xs text-gray-400 font-mono pt-1">
-                          {Chess.col_label(col)}
-                        </div>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mt-4 flex justify-between items-center text-sm">
-                  <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-white border border-gray-300"></span>
-                    <span class={[
-                      "font-medium",
-                      if(@game.turn == :white and @game.status == :playing, do: "text-primary", else: "text-gray-600")
-                    ]}>
-                      {player_display_name(@game.white_player, "Waiting...")}
-                    </span>
-                    <%= if @player_color == :white do %>
-                      <span class="text-xs text-gray-400">(you)</span>
-                    <% end %>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <%= if @player_color == :black do %>
-                      <span class="text-xs text-gray-400">(you)</span>
-                    <% end %>
-                    <span class={[
-                      "font-medium",
-                      if(@game.turn == :black and @game.status == :playing, do: "text-primary", else: "text-gray-600")
-                    ]}>
-                      {player_display_name(@game.black_player, "Waiting...")}
-                    </span>
-                    <span class="w-3 h-3 rounded-full bg-gray-800"></span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-4 text-center">
-                <button phx-click="back_to_menu" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-                  Leave Game
-                </button>
-              </div>
-            </div>
-
-            <div class="w-full lg:w-72 flex flex-col gap-4">
-              <div class="bg-white border border-gray-200 rounded-2xl p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Move History</h3>
-                <div class="space-y-1 max-h-48 overflow-y-auto">
-                  <%= if @game.moves == [] do %>
-                    <p class="text-xs text-gray-400">No moves yet</p>
-                  <% else %>
-                    <%= for {move, idx} <- Enum.with_index(@game.moves) do %>
-                      <div class={[
-                        "flex items-center gap-2 text-xs px-2 py-1 rounded",
-                        if(rem(idx, 2) == 0, do: "bg-gray-50", else: "")
-                      ]}>
-                        <span class="text-gray-400 w-6">{div(idx, 2) + 1}.</span>
-                        <span class="font-mono font-medium text-gray-700">{move}</span>
-                      </div>
-                    <% end %>
-                  <% end %>
-                </div>
-              </div>
-
-              <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Chat</h3>
-                <div id="chat-messages" phx-update="stream" class="flex-1 space-y-2 max-h-64 overflow-y-auto mb-3 min-h-[4rem]">
-                  <div class="hidden only:flex items-center justify-center h-full">
-                    <p class="text-xs text-gray-400">No messages yet</p>
-                  </div>
-                  <%= for {id, msg} <- @streams.chat_messages do %>
-                    <div id={id} class={[
-                      "text-xs rounded-xl px-3 py-2 max-w-full break-words",
-                      if(msg.from == @player_name,
-                        do: "bg-green-800 text-white ml-6",
-                        else: "bg-gray-100 text-gray-800 mr-6")
-                    ]}>
-                      <span class="font-medium block opacity-70 text-[10px] mb-0.5">{msg.from}</span>
-                      {msg.text}
-                    </div>
-                  <% end %>
-                </div>
-                <form phx-submit="send_chat" class="flex gap-2">
+        <%= cond do %>
+          <% @screen == :lobby -> %>
+            <div class="max-w-md mx-auto">
+              <div class="bg-white border border-gray-200 rounded-2xl p-8 text-center space-y-6">
+                <div class="text-6xl">♟</div>
+                <h2 class="text-xl font-semibold text-gray-900">Enter Your Name</h2>
+                <p class="text-sm text-gray-500">
+                  If your name matches a registered user, your account will be linked
+                </p>
+                <form phx-submit="set_name" class="space-y-4">
                   <input
                     type="text"
-                    name="message"
-                    value={@chat_input}
-                    phx-change="update_chat_input"
-                    placeholder="Say something..."
-                    autocomplete="off"
-                    class="flex-1 px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-700/20 focus:border-green-700"
+                    name="name"
+                    placeholder="Your name..."
+                    required
+                    class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
-                  <button type="submit" class="px-3 py-2 rounded-lg text-xs font-medium text-white bg-green-800 hover:bg-green-900 transition-colors">
-                    Send
+                  <button
+                    type="submit"
+                    class="w-full px-4 py-3 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors"
+                  >
+                    Continue
                   </button>
                 </form>
               </div>
             </div>
-          </div>
+          <% @screen == :menu -> %>
+            <div class="max-w-md mx-auto space-y-4">
+              <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center">
+                <p class="text-sm text-gray-500">Playing as</p>
+                <p class="text-lg font-semibold text-gray-900">{@player_name}</p>
+              </div>
 
-        <% true -> %>
-          <div class="text-center py-8 text-gray-400">Loading...</div>
-      <% end %>
-    </div>
+              <div class="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+                <h3 class="text-lg font-semibold text-gray-900">Create New Game</h3>
+                <p class="text-sm text-gray-500">
+                  Start a game and share the code with your opponent
+                </p>
+                <button
+                  phx-click="create_game"
+                  class="w-full px-4 py-3 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors"
+                >
+                  Create Game
+                </button>
+              </div>
+
+              <div class="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+                <h3 class="text-lg font-semibold text-gray-900">Join Game</h3>
+                <p class="text-sm text-gray-500">Enter a game code to join your opponent</p>
+                <form phx-submit="join_game" class="flex gap-2">
+                  <input
+                    type="text"
+                    name="code"
+                    value={@join_code}
+                    phx-keyup="update_join_code"
+                    phx-value-code=""
+                    placeholder="Game code..."
+                    required
+                    maxlength="6"
+                    class="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase tracking-widest text-center font-mono"
+                  />
+                  <button
+                    type="submit"
+                    class="px-6 py-3 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors"
+                  >
+                    Join
+                  </button>
+                </form>
+              </div>
+            </div>
+          <% @screen == :game and @game != nil -> %>
+            <div class="flex flex-col lg:flex-row gap-6 items-start">
+              <div class="flex-1 w-full lg:w-auto">
+                <div class="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
+                  <div class="flex justify-between items-center mb-4">
+                    <div>
+                      <span class="text-sm font-medium text-gray-500">Game</span>
+                      <span class="ml-2 font-mono text-lg font-bold tracking-widest text-primary">
+                        {@game_id}
+                      </span>
+                    </div>
+                    <span class={[
+                      "rounded-full px-3 py-1 text-xs font-medium",
+                      if(@game.status == :playing,
+                        do: "bg-green-50 text-green-700",
+                        else: "bg-gray-100 text-gray-600"
+                      )
+                    ]}>
+                      {status_text(@game)}
+                    </span>
+                  </div>
+
+                  <div class="flex justify-center">
+                    <div class="inline-block border-2 border-[#6d4c2a] rounded-lg overflow-hidden shadow-lg">
+                      <%= for row <- board_rows(@player_color) do %>
+                        <div class="flex">
+                          <div class="w-5 sm:w-6 flex items-center justify-center text-xs text-gray-400 font-mono">
+                            {row + 1}
+                          </div>
+                          <%= for col <- 0..7 do %>
+                            <button
+                              phx-click="select_square"
+                              phx-value-row={row}
+                              phx-value-col={col}
+                              class={[
+                                "w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center text-2xl sm:text-3xl md:text-4xl cursor-pointer transition-all duration-100 select-none",
+                                square_color(row, col),
+                                @selected == {row, col} &&
+                                  "ring-2 ring-inset ring-blue-500 bg-blue-300/60",
+                                {row, col} in @valid_moves &&
+                                  "ring-2 ring-inset ring-emerald-400 bg-emerald-200/50",
+                                piece_text_color(Map.get(@game.board, {row, col}))
+                              ]}
+                            >
+                              {Chess.piece_symbol(Map.get(@game.board, {row, col}))}
+                            </button>
+                          <% end %>
+                        </div>
+                      <% end %>
+                      <div class="flex">
+                        <div class="w-5 sm:w-6"></div>
+                        <%= for col <- 0..7 do %>
+                          <div class="w-10 sm:w-12 md:w-14 text-center text-xs text-gray-400 font-mono pt-1">
+                            {Chess.col_label(col)}
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 flex justify-between items-center text-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="w-3 h-3 rounded-full bg-white border border-gray-300"></span>
+                      <span class={[
+                        "font-medium",
+                        if(@game.turn == :white and @game.status == :playing,
+                          do: "text-primary",
+                          else: "text-gray-600"
+                        )
+                      ]}>
+                        {player_display_name(@game.white_player, "Waiting...")}
+                      </span>
+                      <%= if @player_color == :white do %>
+                        <span class="text-xs text-gray-400">(you)</span>
+                      <% end %>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <%= if @player_color == :black do %>
+                        <span class="text-xs text-gray-400">(you)</span>
+                      <% end %>
+                      <span class={[
+                        "font-medium",
+                        if(@game.turn == :black and @game.status == :playing,
+                          do: "text-primary",
+                          else: "text-gray-600"
+                        )
+                      ]}>
+                        {player_display_name(@game.black_player, "Waiting...")}
+                      </span>
+                      <span class="w-3 h-3 rounded-full bg-gray-800"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                  <button
+                    phx-click="back_to_menu"
+                    class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                  >
+                    Leave Game
+                  </button>
+                </div>
+              </div>
+
+              <div class="w-full lg:w-72 flex flex-col gap-4">
+                <div class="bg-white border border-gray-200 rounded-2xl p-4">
+                  <h3 class="text-sm font-semibold text-gray-900 mb-3">Move History</h3>
+                  <div class="space-y-1 max-h-48 overflow-y-auto">
+                    <%= if @game.moves == [] do %>
+                      <p class="text-xs text-gray-400">No moves yet</p>
+                    <% else %>
+                      <%= for {move, idx} <- Enum.with_index(@game.moves) do %>
+                        <div class={[
+                          "flex items-center gap-2 text-xs px-2 py-1 rounded",
+                          if(rem(idx, 2) == 0, do: "bg-gray-50", else: "")
+                        ]}>
+                          <span class="text-gray-400 w-6">{div(idx, 2) + 1}.</span>
+                          <span class="font-mono font-medium text-gray-700">{move}</span>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col">
+                  <h3 class="text-sm font-semibold text-gray-900 mb-3">Chat</h3>
+                  <div
+                    id="chat-messages"
+                    phx-update="stream"
+                    class="flex-1 space-y-2 max-h-64 overflow-y-auto mb-3 min-h-[4rem]"
+                  >
+                    <div class="hidden only:flex items-center justify-center h-full">
+                      <p class="text-xs text-gray-400">No messages yet</p>
+                    </div>
+                    <%= for {id, msg} <- @streams.chat_messages do %>
+                      <div
+                        id={id}
+                        class={[
+                          "text-xs rounded-xl px-3 py-2 max-w-full break-words",
+                          if(msg.from == @player_name,
+                            do: "bg-green-800 text-white ml-6",
+                            else: "bg-gray-100 text-gray-800 mr-6"
+                          )
+                        ]}
+                      >
+                        <span class="font-medium block opacity-70 text-[10px] mb-0.5">
+                          {msg.from}
+                        </span>
+                        {msg.text}
+                      </div>
+                    <% end %>
+                  </div>
+                  <form phx-submit="send_chat" class="flex gap-2">
+                    <input
+                      type="text"
+                      name="message"
+                      value={@chat_input}
+                      phx-change="update_chat_input"
+                      placeholder="Say something..."
+                      autocomplete="off"
+                      class="flex-1 px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-700/20 focus:border-green-700"
+                    />
+                    <button
+                      type="submit"
+                      class="px-3 py-2 rounded-lg text-xs font-medium text-white bg-green-800 hover:bg-green-900 transition-colors"
+                    >
+                      Send
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% true -> %>
+            <div class="text-center py-8 text-gray-400">Loading...</div>
+        <% end %>
+      </div>
     </Layouts.app>
     """
   end

@@ -1,0 +1,18 @@
+# Run: docker compose up --build
+# Requires a project-root `.env` (see `.env.example`). Compose injects it into the container.
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: personal-hub:latest
+    ports:
+      - "${PORT:-4000}:${PORT:-4000}"
+    env_file:
+      - .env
+    environment:
+      PHX_HOST: ${PHX_HOST:-localhost}
+      PHX_SCHEME: ${PHX_SCHEME:-http}
+      PHX_PUBLIC_PORT: ${PHX_PUBLIC_PORT:-4000}
+      PORT: ${PORT:-4000}

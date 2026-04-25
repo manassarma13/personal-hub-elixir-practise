@@ -10,14 +10,15 @@
 #   - https://hub.docker.com/_/ubuntu?tab=tags&page=1&name=jammy - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
 
+# Tags must exist on Docker Hub: https://hub.docker.com/r/hexpm/elixir/tags
 ARG ELIXIR_VERSION=1.19.4
-ARG OTP_VERSION=28.0.1
-ARG DEBIAN_VERSION=bookworm-20250113-slim
+ARG OTP_VERSION=26.2.5.18
+ARG DEBIAN_VERSION=bookworm-20260223-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
-FROM ${BUILDER_IMAGE} as builder
+FROM ${BUILDER_IMAGE} AS builder
 
 # install build dependencies
 RUN apt-get update -y && apt-get install -y build-essential git \
@@ -40,7 +41,6 @@ COPY apps/personal_hub_web/mix.exs apps/personal_hub_web/mix.exs
 COPY config/config.exs config/${MIX_ENV}.exs config/
 
 RUN mix deps.get --only $MIX_ENV
-RUN mkdir config
 
 # copy compile-time config files before we compile dependencies
 # to ensure any relevant config change will trigger the dependencies
@@ -73,9 +73,9 @@ RUN apt-get update -y && \
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 WORKDIR "/app"
 RUN chown nobody /app

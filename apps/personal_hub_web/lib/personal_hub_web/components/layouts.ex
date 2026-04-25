@@ -35,164 +35,223 @@ defmodule PersonalHubWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <header
+      id="app-header"
+      class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm [&_summary::-webkit-details-marker]:hidden [&_summary::marker]:content-none"
+    >
       <div class="max-w-6xl mx-auto px-4">
         <div class="flex items-center justify-between h-14 sm:h-16">
-          <a href="/" class="text-lg sm:text-xl font-bold text-gray-900 hover:text-primary transition-colors tracking-tight">
+          <a
+            href="/"
+            class="text-lg sm:text-xl font-bold text-gray-900 hover:text-primary transition-colors tracking-tight"
+          >
             Personal Hub
           </a>
 
           <nav class="hidden md:flex items-center gap-1">
-            <a href="/" class="px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+            <a
+              href="/"
+              class="px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+            >
               Dashboard
             </a>
 
-            <div class="relative group/content">
-              <button class="flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer">
+            <details class="relative group">
+              <summary class="flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer select-none">
                 Content
-                <.icon name="hero-chevron-down" class="size-3.5" />
-              </button>
-              <div class={[
-                "absolute left-1/2 -translate-x-1/2 top-full pt-2",
-                "opacity-0 invisible pointer-events-none",
-                "group-hover/content:opacity-100 group-hover/content:visible group-hover/content:pointer-events-auto",
-                "group-focus-within/content:opacity-100 group-focus-within/content:visible group-focus-within/content:pointer-events-auto",
-                "transition-all duration-150"
-              ]}>
+                <.icon name="hero-chevron-down" class="size-3.5 group-open:rotate-180 transition-transform" />
+              </summary>
+              <div class="absolute left-1/2 -translate-x-1/2 top-full z-[100] pt-2 min-w-56">
                 <div class="w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2">
-                  <a href="/posts" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-document-text" class="size-5 text-gray-400" />
-                    Blog Posts
+                  <a
+                    href="/posts"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-document-text" class="size-5 text-gray-400" /> Blog Posts
                   </a>
-                  <a href="/notes" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-pencil-square" class="size-5 text-gray-400" />
-                    Notes
+                  <a
+                    href="/notes"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-pencil-square" class="size-5 text-gray-400" /> Notes
                   </a>
-                  <a href="/tasks" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-clipboard-document-list" class="size-5 text-gray-400" />
-                    Tasks
+                  <a
+                    href="/tasks"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-clipboard-document-list" class="size-5 text-gray-400" /> Tasks
                   </a>
-                  <a href="/kanban" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-view-columns" class="size-5 text-gray-400" />
-                    Kanban Board
+                  <a
+                    href="/kanban"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-view-columns" class="size-5 text-gray-400" /> Kanban Board
                   </a>
                 </div>
               </div>
-            </div>
+            </details>
 
-            <div class="relative group/tools">
-              <button class="flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer">
+            <details class="relative group">
+              <summary class="flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer select-none">
                 Tools
-                <.icon name="hero-chevron-down" class="size-3.5" />
-              </button>
-              <div class={[
-                "absolute left-1/2 -translate-x-1/2 top-full pt-2",
-                "opacity-0 invisible pointer-events-none",
-                "group-hover/tools:opacity-100 group-hover/tools:visible group-hover/tools:pointer-events-auto",
-                "group-focus-within/tools:opacity-100 group-focus-within/tools:visible group-focus-within/tools:pointer-events-auto",
-                "transition-all duration-150"
-              ]}>
+                <.icon name="hero-chevron-down" class="size-3.5 group-open:rotate-180 transition-transform" />
+              </summary>
+              <div class="absolute left-1/2 -translate-x-1/2 top-full z-[100] pt-2 min-w-56">
                 <div class="w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2">
-                  <a href="/documents" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  <a
+                    href="/documents"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
                     <.icon name="hero-document-magnifying-glass" class="size-5 text-gray-400" />
                     Document Viewer
                   </a>
-                  <a href="/visualize" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-chart-bar" class="size-5 text-gray-400" />
-                    Data Viz
+                  <a
+                    href="/visualize"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-chart-bar" class="size-5 text-gray-400" /> Data Viz
                   </a>
-                  <a href="/chess" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-puzzle-piece" class="size-5 text-gray-400" />
-                    Chess
+                  <a
+                    href="/chess"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-puzzle-piece" class="size-5 text-gray-400" /> Chess
                   </a>
-                  <a href="/typing" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-command-line" class="size-5 text-gray-400" />
-                    Typing Game
+                  <a
+                    href="/typing"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-command-line" class="size-5 text-gray-400" /> Typing Game
+                  </a>
+                  <a
+                    href="/drop"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-violet-600 hover:bg-violet-50 transition-colors font-medium"
+                  >
+                    <.icon name="hero-paper-airplane" class="size-5 text-violet-500 -rotate-45" />
+                    Drop
                   </a>
                 </div>
               </div>
-            </div>
+            </details>
 
-            <a href="/chess" class="px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+            <a
+              href="/drop"
+              class="px-3 py-2 rounded-full text-sm font-medium text-violet-600 hover:bg-violet-50 transition-colors"
+            >
+              <.icon name="hero-paper-airplane" class="size-4 inline -rotate-45 mr-0.5" /> Drop
+            </a>
+            <a
+              href="/chess"
+              class="px-3 py-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+            >
               ♟ Chess
             </a>
 
-            <div class="relative group/create">
-              <button class="flex items-center gap-1.5 ml-2 px-4 py-2 rounded-full text-sm font-medium text-white bg-primary hover:bg-primary/90 shadow-sm transition-colors cursor-pointer">
-                <.icon name="hero-plus" class="size-4" />
-                New
-              </button>
-              <div class={[
-                "absolute right-0 top-full pt-2",
-                "opacity-0 invisible pointer-events-none",
-                "group-hover/create:opacity-100 group-hover/create:visible group-hover/create:pointer-events-auto",
-                "group-focus-within/create:opacity-100 group-focus-within/create:visible group-focus-within/create:pointer-events-auto",
-                "transition-all duration-150"
-              ]}>
+            <details class="relative group ml-2">
+              <summary class="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-white bg-primary hover:bg-primary/90 shadow-sm transition-colors cursor-pointer list-none select-none">
+                <.icon name="hero-plus" class="size-4" /> New
+              </summary>
+              <div class="absolute right-0 top-full z-[100] pt-2 min-w-56">
                 <div class="w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2">
-                  <a href="/posts/new" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-document-plus" class="size-5 text-gray-400" />
-                    New Post
+                  <a
+                    href="/posts/new"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-document-plus" class="size-5 text-gray-400" /> New Post
                   </a>
-                  <a href="/notes/new" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <.icon name="hero-pencil" class="size-5 text-gray-400" />
-                    New Note
+                  <a
+                    href="/notes/new"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <.icon name="hero-pencil" class="size-5 text-gray-400" /> New Note
                   </a>
-                  <a href="/tasks/new" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  <a
+                    href="/tasks/new"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
                     <.icon name="hero-clipboard-document-check" class="size-5 text-gray-400" />
                     New Task
                   </a>
                 </div>
               </div>
-            </div>
+            </details>
           </nav>
 
-          <div class="md:hidden relative group/mobile">
-            <button class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer">
+          <details class="md:hidden relative group z-[100]">
+            <summary class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer list-none">
               <.icon name="hero-bars-3" class="size-6" />
-            </button>
-            <div class={[
-              "absolute right-0 top-full pt-2",
-              "opacity-0 invisible pointer-events-none",
-              "group-hover/mobile:opacity-100 group-hover/mobile:visible group-hover/mobile:pointer-events-auto",
-              "group-focus-within/mobile:opacity-100 group-focus-within/mobile:visible group-focus-within/mobile:pointer-events-auto",
-              "transition-all duration-150"
-            ]}>
+            </summary>
+            <div class="absolute right-0 top-full pt-2 w-64">
               <div class="w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2">
-                <a href="/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a
+                  href="/"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
                   <.icon name="hero-home" class="size-5 text-gray-400" /> Dashboard
                 </a>
                 <div class="border-t border-gray-100 my-1"></div>
                 <p class="px-4 py-1.5 text-xs font-semibold text-gray-400 uppercase">Content</p>
-                <a href="/posts" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a
+                  href="/posts"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
                   <.icon name="hero-document-text" class="size-5 text-gray-400" /> Blog Posts
                 </a>
-                <a href="/notes" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a
+                  href="/notes"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
                   <.icon name="hero-pencil-square" class="size-5 text-gray-400" /> Notes
                 </a>
-                <a href="/tasks" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a
+                  href="/tasks"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
                   <.icon name="hero-clipboard-document-list" class="size-5 text-gray-400" /> Tasks
                 </a>
-                <a href="/kanban" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a
+                  href="/kanban"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
                   <.icon name="hero-view-columns" class="size-5 text-gray-400" /> Kanban Board
                 </a>
                 <div class="border-t border-gray-100 my-1"></div>
                 <p class="px-4 py-1.5 text-xs font-semibold text-gray-400 uppercase">Tools</p>
-                <a href="/documents" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
-                  <.icon name="hero-document-magnifying-glass" class="size-5 text-gray-400" /> Documents
+                <a
+                  href="/documents"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <.icon name="hero-document-magnifying-glass" class="size-5 text-gray-400" />
+                  Documents
                 </a>
-                <a href="/visualize" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a
+                  href="/visualize"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
                   <.icon name="hero-chart-bar" class="size-5 text-gray-400" /> Data Viz
                 </a>
-                <a href="/chess" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a
+                  href="/chess"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
                   <.icon name="hero-puzzle-piece" class="size-5 text-gray-400" /> Chess
                 </a>
-                <a href="/typing" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a
+                  href="/typing"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
                   <.icon name="hero-command-line" class="size-5 text-gray-400" /> Typing Game
+                </a>
+                <div class="border-t border-gray-100 my-1"></div>
+                <a
+                  href="/drop"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-violet-600 hover:bg-violet-50 font-medium"
+                >
+                  <.icon name="hero-paper-airplane" class="size-5 text-violet-500 -rotate-45" /> Drop
                 </a>
               </div>
             </div>
-          </div>
+          </details>
         </div>
       </div>
     </header>

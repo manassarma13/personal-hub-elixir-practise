@@ -26,6 +26,10 @@ erl_crash.dump
 *.db
 *.db-*
 
+# Local secrets (never commit)
+.env
+.env.*.local
+
 # IDE / Editor
 .elixir_ls/
 .vscode/
@@ -44,7 +48,6 @@ node_modules/
 # OS files
 Thumbs.db
 
-pitch.md
-Project.md
-Code.md
-AGENTS.md
+# Markdown (keep root README tracked)
+*.md
+!README.md

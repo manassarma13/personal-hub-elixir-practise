@@ -3,6 +3,10 @@
 .git
 .gitignore
 
+# Never send local secrets in the build context
+.env
+.env.*
+
 # Ignore build artifacts
 _build/
 deps/

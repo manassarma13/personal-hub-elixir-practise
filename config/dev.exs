@@ -1,5 +1,33 @@
 import Config
 
+# Optional project-root `.env` (gitignored) — load before endpoint config so
+# `mix phx.server` picks up SECRET_KEY_BASE and other vars without exporting them.
+root_dir = Path.expand("..", __DIR__)
+
+case File.read(Path.join(root_dir, ".env")) do
+  {:ok, contents} ->
+    contents
+    |> String.split("\n")
+    |> Enum.each(fn raw_line ->
+      line = String.trim(raw_line)
+
+      if line != "" and not String.starts_with?(line, "#") do
+        case String.split(line, "=", parts: 2) do
+          [key, val] ->
+            key = String.trim(key)
+            val = String.trim(val)
+            if key != "", do: System.put_env(key, val)
+
+          _ ->
+            :ok
+        end
+      end
+    end)
+
+  {:error, _} ->
+    :ok
+end
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -13,7 +41,9 @@ config :personal_hub_web, PersonalHubWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "TKj1yBKKPf28m5N6XUZkONIaY/0pImhW+Uu55UM8l9styh7vCyM7WV7VcQt7nMsp",
+  secret_key_base:
+    System.get_env("SECRET_KEY_BASE") ||
+      "TKj1yBKKPf28m5N6XUZkONIaY/0pImhW+Uu55UM8l9styh7vCyM7WV7VcQt7nMsp",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:personal_hub_web, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:personal_hub_web, ~w(--watch)]}
