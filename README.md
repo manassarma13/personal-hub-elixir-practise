@@ -4,6 +4,21 @@ A fullstack Elixir umbrella application powered by Phoenix LiveView — deliveri
 
 Content is persisted in the browser via localStorage. Server-side features like multiplayer chess and ephemeral text sharing leverage Elixir's OTP primitives (GenServer, DynamicSupervisor, Registry, PubSub) for lightweight, fault-tolerant concurrency.
 
+## Overview
+
+### 1. Architecture Structure (Umbrella App)
+The project is split into two main applications under the `apps/` directory, adhering to the Elixir umbrella project pattern:
+*   **`personal_hub` (Core Logic):** This contains all the backend business logic and OTP (Open Telecom Platform) supervision trees. It handles complex server-side operations like the multiplayer chess engine, ephemeral room management for text sharing, analytics tracking, and document parsing. It operates completely independently of any web-specific code.
+*   **`personal_hub_web` (Web Layer):** This is the Phoenix web application. It handles routing, LiveView components (the UI), and real-time WebSocket communication with the browser. It relies on the core `personal_hub` app for functionality.
+
+### 2. Data Storage & Flow (No Database)
+A unique aspect of this project is that it **does not use a database** (like PostgreSQL or MySQL). Instead, it manages state in two ways:
+*   **Client-Side (`localStorage`):** For features like the Blog, Notes, Tasks, and Kanban Board, the data is saved directly in the user's browser using `localStorage`. A JavaScript hook (`LocalStore`) acts as a bridge, communicating this local data back to the Elixir LiveView over WebSockets so the server can render the UI.
+*   **Server-Side Ephemeral State (OTP Processes):** For real-time and multiplayer features, Elixir's concurrency primitives are used to store state in-memory:
+    *   **GenServers:** Used to manage individual game states (e.g., a chess match) or temporary rooms (e.g., the "Drop" text sharing feature). Once a room expires or a game ends, the GenServer is terminated, and the data is wiped.
+    *   **PubSub:** Phoenix PubSub broadcasts real-time events between different users (like a chess move or a chat message).
+    *   **DynamicSupervisors & Registries:** Used to spin up new isolated processes on demand (like a new chess game) and keep track of them.
+
 ## Features
 
 | Feature | Description | Storage |
