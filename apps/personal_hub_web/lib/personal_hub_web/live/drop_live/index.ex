@@ -257,7 +257,7 @@ defmodule PersonalHubWeb.DropLive.Index do
               name="text"
               value={@clip_text}
               phx-change="update_clip_text"
-              placeholder="Paste or type anything — links, text, UPI IDs..."
+              placeholder="Paste or type anything — links, text"
               rows="3"
               class="w-full p-4 pr-16 rounded-2xl border border-gray-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 outline-none resize-none text-gray-800 placeholder:text-gray-400 transition-all"
             />
