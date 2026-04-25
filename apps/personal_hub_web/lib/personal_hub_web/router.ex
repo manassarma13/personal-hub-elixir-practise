@@ -49,6 +49,9 @@ defmodule PersonalHubWeb.Router do
 
     # Drop — Ephemeral text sharing
     live "/drop", DropLive.Index, :index
+
+    # Admin Analytics
+    live "/admin/analytics", AnalyticsLive, :index
   end
 
   # Enable LiveDashboard in development

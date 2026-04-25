@@ -49,7 +49,9 @@ defmodule PersonalHub.Analytics do
           browser_info: browser_info
         })
 
-      {:noreply, %{state | total_sessions: state.total_sessions + 1, active_sessions: new_active}}
+      new_state = %{state | total_sessions: state.total_sessions + 1, active_sessions: new_active}
+      Phoenix.PubSub.broadcast(PersonalHub.PubSub, "analytics", {:updated, new_state})
+      {:noreply, new_state}
     end
   end
 
@@ -80,8 +82,9 @@ defmodule PersonalHub.Analytics do
         }
 
         new_history = [completed_session | state.historical_sessions] |> Enum.take(@max_history)
-
-        {:noreply, %{state | active_sessions: new_active, historical_sessions: new_history}}
+        new_state = %{state | active_sessions: new_active, historical_sessions: new_history}
+        Phoenix.PubSub.broadcast(PersonalHub.PubSub, "analytics", {:updated, new_state})
+        {:noreply, new_state}
     end
   end
 end

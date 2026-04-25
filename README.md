@@ -19,6 +19,26 @@ Content is persisted in the browser via localStorage. Server-side features like 
 | **Typing Game** | 60-second WPM speed test with live accuracy tracking | Client-side |
 | **Dashboard** | Unified overview with stats, feature cards, and quick actions | — |
 
+## User Journeys
+
+### 1. The "Zero-Infrastructure" Guest
+*   **Discovery:** A user follows a link (e.g. from a LinkedIn post) to the dynamic Cloudflare URL.
+*   **Zero-Friction:** They land instantly on the Dashboard with no sign-up or database-driven delay.
+*   **Interaction:** They play a 60-second Typing Test or join a real-time Chess room.
+*   **Collaboration:** They join a **Drop** room, paste a snippet, and see it sync instantly with the owner.
+*   **Privacy:** They close the tab. No account was created, and no data was harvested.
+
+### 2. The "Private Command Center" (Owner)
+*   **Initialization:** The owner starts the home server. The app is reachable globally via a secure tunnel.
+*   **Organization:** They use **Notes** and **Kanban** for daily planning. All data is persisted in their local browser storage.
+*   **Seamless Transfer:** They use **Drop** to move text/links between their phone and desktop without using a third-party chat app.
+*   **Stateless Review:** They upload sensitive `.xlsx` or `.docx` files to the **Document Viewer** to extract text, knowing the file is never written to a persistent disk.
+
+### 3. The "In-Memory" Interaction
+*   **Stateful Gaming:** Two players join a Chess game via a code. The server spawns a unique `GameServer` process.
+*   **Ephemeral Sharing:** A "Drop" room is created for a quick file/text transfer. The room auto-terminates after 10 minutes of inactivity, wiping all traces from the server's memory.
+*   **Silent Monitoring:** The owner checks session stats via the server-side analytics, which tracks visitors using process monitoring instead of client-side tracking scripts.
+
 ## Architecture
 
 ```
