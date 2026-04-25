@@ -49,13 +49,19 @@ if config_env() == :prod do
     end
 
   check_origin =
-    if phx_scheme == "http" and phx_host in ["localhost", "127.0.0.1"] do
-      [
-        "http://localhost:#{phx_public_port}",
-        "http://127.0.0.1:#{phx_public_port}"
-      ]
-    else
-      true
+    cond do
+      System.get_env("ALLOW_ALL_ORIGINS") == "true" ->
+        false
+
+      phx_host == "localhost" ->
+        # Allow random Cloudflare/Ngrok tunnels during local hosting
+        false
+
+      phx_scheme == "http" and phx_host == "127.0.0.1" ->
+        ["http://127.0.0.1:#{phx_public_port}"]
+
+      true ->
+        true
     end
 
   config :personal_hub_web, PersonalHubWeb.Endpoint,
