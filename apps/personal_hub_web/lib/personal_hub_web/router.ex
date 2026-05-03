@@ -50,6 +50,9 @@ defmodule PersonalHubWeb.Router do
     # Drop — Ephemeral text sharing
     live "/drop", DropLive.Index, :index
 
+    # Social Media Composer
+    live "/social", SocialLive.Index, :index
+
     # Admin Analytics
     live "/admin/analytics", AnalyticsLive, :index
   end

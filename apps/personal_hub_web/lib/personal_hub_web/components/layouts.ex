@@ -130,6 +130,13 @@ defmodule PersonalHubWeb.Layouts do
                     <.icon name="hero-paper-airplane" class="size-5 text-violet-500 -rotate-45" />
                     Drop
                   </a>
+                  <a
+                    href="/social"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-teal-600 hover:bg-teal-50 transition-colors font-medium"
+                  >
+                    <.icon name="hero-megaphone" class="size-5 text-teal-500" />
+                    Social Composer
+                  </a>
                 </div>
               </div>
             </details>
@@ -248,6 +255,12 @@ defmodule PersonalHubWeb.Layouts do
                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-violet-600 hover:bg-violet-50 font-medium"
                 >
                   <.icon name="hero-paper-airplane" class="size-5 text-violet-500 -rotate-45" /> Drop
+                </a>
+                <a
+                  href="/social"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-teal-600 hover:bg-teal-50 font-medium"
+                >
+                  <.icon name="hero-megaphone" class="size-5 text-teal-500" /> Social Composer
                 </a>
               </div>
             </div>

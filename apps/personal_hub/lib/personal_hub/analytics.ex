@@ -5,6 +5,14 @@ defmodule PersonalHub.Analytics do
   @name __MODULE__
   @max_history 1000
 
+  defmodule Session do
+    defstruct [:start_time, :browser_info]
+  end
+
+  defmodule CompletedSession do
+    defstruct [:start_time, :end_time, :duration_seconds, :browser_info]
+  end
+
   defstruct total_sessions: 0,
             active_sessions: %{},
             historical_sessions: []
@@ -13,25 +21,16 @@ defmodule PersonalHub.Analytics do
     GenServer.start_link(__MODULE__, %__MODULE__{}, name: @name)
   end
 
-  @doc """
-  Tracks a new session for the given process PID.
-  The `browser_info` typically contains the user agent.
-  """
   def track_session(pid, browser_info) do
     GenServer.cast(@name, {:track_session, pid, browser_info})
   end
 
-  @doc """
-  Returns the current analytics data.
-  """
   def get_stats do
     GenServer.call(@name, :get_stats)
   end
 
   @impl true
-  def init(state) do
-    {:ok, state}
-  end
+  def init(state), do: {:ok, state}
 
   @impl true
   def handle_cast({:track_session, pid, browser_info}, state) do
@@ -39,18 +38,14 @@ defmodule PersonalHub.Analytics do
       {:noreply, state}
     else
       Process.monitor(pid)
-      start_time = DateTime.utc_now()
 
       Logger.info("New session started. Browser: #{browser_info}")
 
-      new_active =
-        Map.put(state.active_sessions, pid, %{
-          start_time: start_time,
-          browser_info: browser_info
-        })
+      session = %Session{start_time: DateTime.utc_now(), browser_info: browser_info}
+      new_active = Map.put(state.active_sessions, pid, session)
 
       new_state = %{state | total_sessions: state.total_sessions + 1, active_sessions: new_active}
-      Phoenix.PubSub.broadcast(PersonalHub.PubSub, "analytics", {:updated, new_state})
+      broadcast(new_state)
       {:noreply, new_state}
     end
   end
@@ -66,25 +61,27 @@ defmodule PersonalHub.Analytics do
       {nil, _} ->
         {:noreply, state}
 
-      {session_info, new_active} ->
+      {session, new_active} ->
         end_time = DateTime.utc_now()
-        duration_seconds = DateTime.diff(end_time, session_info.start_time, :second)
+        duration_seconds = DateTime.diff(end_time, session.start_time, :second)
 
-        Logger.info(
-          "Session ended. Duration: #{duration_seconds}s. Browser: #{session_info.browser_info}"
-        )
+        Logger.info("Session ended. Duration: #{duration_seconds}s. Browser: #{session.browser_info}")
 
-        completed_session = %{
-          start_time: session_info.start_time,
+        completed = %CompletedSession{
+          start_time: session.start_time,
           end_time: end_time,
           duration_seconds: duration_seconds,
-          browser_info: session_info.browser_info
+          browser_info: session.browser_info
         }
 
-        new_history = [completed_session | state.historical_sessions] |> Enum.take(@max_history)
+        new_history = [completed | state.historical_sessions] |> Enum.take(@max_history)
         new_state = %{state | active_sessions: new_active, historical_sessions: new_history}
-        Phoenix.PubSub.broadcast(PersonalHub.PubSub, "analytics", {:updated, new_state})
+        broadcast(new_state)
         {:noreply, new_state}
     end
+  end
+
+  defp broadcast(state) do
+    Phoenix.PubSub.broadcast(PersonalHub.PubSub, "analytics", {:updated, state})
   end
 end

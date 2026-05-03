@@ -114,7 +114,7 @@ defmodule PersonalHub.Chess.GameServer do
                   turn: next_turn,
                   status: new_status,
                   winner: winner,
-                  moves: state.moves ++ [notation]
+                  moves: [notation | state.moves]
               }
 
               broadcast(state.game_id, {:move_made, serialize(new_state)})
@@ -151,7 +151,7 @@ defmodule PersonalHub.Chess.GameServer do
       black_player: state.black_player,
       status: state.status,
       winner: state.winner,
-      moves: state.moves
+      moves: Enum.reverse(state.moves)
     }
   end
 

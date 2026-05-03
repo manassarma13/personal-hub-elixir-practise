@@ -316,6 +316,121 @@ defmodule PersonalHubWeb.VisualizeLive.Index do
 
   defp max_heatmap_value(_), do: 1
 
+  defp placeholder_for_type(nil), do: placeholder_for_type("bar")
+
+  defp placeholder_for_type("bar") do
+    """
+    {
+      "labels": ["Jan", "Feb", "Mar"],
+      "datasets": [{
+        "label": "Sales",
+        "data": [10, 20, 30],
+        "backgroundColor": "rgba(255, 56, 92, 0.6)"
+      }]
+    }
+    """
+    |> String.trim()
+  end
+
+  defp placeholder_for_type("line") do
+    """
+    {
+      "labels": ["Jan", "Feb", "Mar", "Apr"],
+      "datasets": [{
+        "label": "Temperature",
+        "data": [5, 12, 18, 23],
+        "borderColor": "rgba(59, 130, 246, 0.8)",
+        "fill": false,
+        "tension": 0.3
+      }]
+    }
+    """
+    |> String.trim()
+  end
+
+  defp placeholder_for_type("pie") do
+    """
+    {
+      "labels": ["Segment A", "Segment B", "Segment C"],
+      "datasets": [{
+        "data": [40, 35, 25],
+        "backgroundColor": [
+          "rgba(255, 56, 92, 0.7)",
+          "rgba(59, 130, 246, 0.7)",
+          "rgba(16, 185, 129, 0.7)"
+        ]
+      }]
+    }
+    """
+    |> String.trim()
+  end
+
+  defp placeholder_for_type("doughnut") do
+    """
+    {
+      "labels": ["Category A", "Category B", "Category C"],
+      "datasets": [{
+        "data": [300, 200, 100],
+        "backgroundColor": [
+          "rgba(255, 56, 92, 0.7)",
+          "rgba(245, 158, 11, 0.7)",
+          "rgba(139, 92, 246, 0.7)"
+        ]
+      }]
+    }
+    """
+    |> String.trim()
+  end
+
+  defp placeholder_for_type("radar") do
+    """
+    {
+      "labels": ["Speed", "Quality", "Communication"],
+      "datasets": [{
+        "label": "Team A",
+        "data": [90, 85, 78],
+        "borderColor": "rgba(255, 56, 92, 0.8)",
+        "backgroundColor": "rgba(255, 56, 92, 0.1)"
+      }]
+    }
+    """
+    |> String.trim()
+  end
+
+  defp placeholder_for_type("scatter") do
+    """
+    {
+      "datasets": [{
+        "label": "Points",
+        "data": [
+          {"x": 10, "y": 20},
+          {"x": 15, "y": 30},
+          {"x": 25, "y": 15}
+        ],
+        "backgroundColor": "rgba(255, 56, 92, 0.6)"
+      }]
+    }
+    """
+    |> String.trim()
+  end
+
+  defp placeholder_for_type("heatmap") do
+    """
+    {
+      "rows": ["Mon", "Tue", "Wed"],
+      "cols": ["9am", "12pm", "3pm"],
+      "values": [
+        [2, 5, 8],
+        [3, 6, 9],
+        [1, 4, 7]
+      ]
+    }
+    """
+    |> String.trim()
+  end
+
+  defp placeholder_for_type(_), do: placeholder_for_type("bar")
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -397,7 +512,7 @@ defmodule PersonalHubWeb.VisualizeLive.Index do
                   value={@json_input}
                   phx-keyup="update_json"
                   phx-value-json=""
-                  placeholder={"{\n  \"labels\": [\"A\", \"B\", \"C\"],\n  \"datasets\": [{\n    \"label\": \"My Data\",\n    \"data\": [10, 20, 30]\n  }]\n}"}
+                  placeholder={placeholder_for_type(@selected_type)}
                   class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-xs font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
                 ></textarea>
                 <%= if @json_error do %>

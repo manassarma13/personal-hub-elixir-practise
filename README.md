@@ -33,6 +33,7 @@ A unique aspect of this project is that it **does not use a database** (like Pos
 | **Chess** | Real-time multiplayer with game codes, move validation, in-game chat | GenServer per game |
 | **Typing Game** | 60-second WPM speed test with live accuracy tracking | Client-side |
 | **Dashboard** | Unified overview with stats, feature cards, and quick actions | — |
+| **Social Composer** | Write once, preview for X/LinkedIn/Instagram/Threads/Bluesky with character limits and one-click copy | Browser localStorage |
 
 ## User Journeys
 
@@ -132,6 +133,8 @@ PersonalHub.Supervisor
 | `/visualize` | `VisualizeLive.Index` | Data visualization |
 | `/chess` | `ChessLive.Index` | Multiplayer chess |
 | `/typing` | `TypingLive.Index` | Typing game |
+| `/social` | `SocialLive.Index` | Social media composer |
+| `/admin/analytics` | `AnalyticsLive` | Real-time visitor analytics |
 
 ## Tech Stack
 

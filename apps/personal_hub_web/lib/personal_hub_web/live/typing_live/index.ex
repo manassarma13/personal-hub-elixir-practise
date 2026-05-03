@@ -45,15 +45,12 @@ defmodule PersonalHubWeb.TypingLive.Index do
       graphemes = String.graphemes(typed)
       target_graphemes = String.graphemes(target)
 
-      correct =
+      {correct, errors} =
         graphemes
         |> Enum.zip(target_graphemes)
-        |> Enum.count(fn {t, g} -> t == g end)
-
-      errors =
-        graphemes
-        |> Enum.zip(target_graphemes)
-        |> Enum.count(fn {t, g} -> t != g end)
+        |> Enum.reduce({0, 0}, fn {t, g}, {c, e} ->
+          if t == g, do: {c + 1, e}, else: {c, e + 1}
+        end)
 
       elapsed = @duration - socket.assigns.time_left
       wpm = if elapsed > 0, do: round(correct / 5 / (elapsed / 60)), else: 0
