@@ -1,4 +1,11 @@
 defmodule PersonalHub.Chess do
+  @type color :: :white | :black
+  @type piece_type :: :king | :queen | :rook | :bishop | :knight | :pawn
+  @type piece :: {color(), piece_type()}
+  @type position :: {non_neg_integer(), non_neg_integer()}
+  @type board :: %{position() => piece()}
+  @type game_result :: {:checkmate, color()} | :stalemate | :check | :playing
+
   @initial_rank [:rook, :knight, :bishop, :queen, :king, :bishop, :knight, :rook]
 
   @piece_symbols %{
@@ -16,6 +23,7 @@ defmodule PersonalHub.Chess do
     {:black, :pawn} => "♟"
   }
 
+  @spec new_board() :: board()
   def new_board do
     white_rank =
       for {piece, col} <- Enum.with_index(@initial_rank),
@@ -33,14 +41,18 @@ defmodule PersonalHub.Chess do
     white_rank |> Map.merge(white_pawns) |> Map.merge(black_pawns) |> Map.merge(black_rank)
   end
 
+  @spec piece_symbol(piece() | nil) :: String.t()
   def piece_symbol(nil), do: ""
   def piece_symbol(piece), do: Map.fetch!(@piece_symbols, piece)
 
+  @spec on_board?(position()) :: boolean()
   def on_board?({row, col}), do: row in 0..7 and col in 0..7
 
+  @spec opposite(color()) :: color()
   def opposite(:white), do: :black
   def opposite(:black), do: :white
 
+  @spec apply_move(board(), position(), position()) :: board()
   def apply_move(board, from, to) do
     piece = Map.fetch!(board, from)
 
@@ -53,6 +65,7 @@ defmodule PersonalHub.Chess do
   defp promote({:black, :pawn}, {0, _}), do: {:black, :queen}
   defp promote(piece, _), do: piece
 
+  @spec find_king(board(), color()) :: position() | nil
   def find_king(board, color) do
     Enum.find_value(board, fn
       {pos, {^color, :king}} -> pos
@@ -60,6 +73,7 @@ defmodule PersonalHub.Chess do
     end)
   end
 
+  @spec in_check?(board(), color()) :: boolean()
   def in_check?(board, color) do
     king_pos = find_king(board, color)
     opponent = opposite(color)
@@ -70,6 +84,7 @@ defmodule PersonalHub.Chess do
     end)
   end
 
+  @spec valid_moves(board(), position()) :: [position()]
   def valid_moves(board, pos) do
     case Map.get(board, pos) do
       nil ->
@@ -86,10 +101,13 @@ defmodule PersonalHub.Chess do
     end
   end
 
+  @spec checkmate?(board(), color()) :: boolean()
   def checkmate?(board, color), do: in_check?(board, color) and no_legal_moves?(board, color)
 
+  @spec stalemate?(board(), color()) :: boolean()
   def stalemate?(board, color), do: not in_check?(board, color) and no_legal_moves?(board, color)
 
+  @spec game_status(board(), color()) :: game_result()
   def game_status(board, turn) do
     cond do
       checkmate?(board, turn) -> {:checkmate, opposite(turn)}
@@ -99,8 +117,10 @@ defmodule PersonalHub.Chess do
     end
   end
 
+  @spec col_label(non_neg_integer()) :: String.t()
   def col_label(col), do: Enum.at(~w(a b c d e f g h), col)
 
+  @spec move_notation(board(), position(), position()) :: String.t()
   def move_notation(board, from, to) do
     {_color, type} = Map.fetch!(board, from)
     capture? = Map.get(board, to) != nil

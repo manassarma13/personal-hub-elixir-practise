@@ -17,14 +17,23 @@ defmodule PersonalHub.Analytics do
             active_sessions: %{},
             historical_sessions: []
 
+  @type t :: %__MODULE__{
+          total_sessions: non_neg_integer(),
+          active_sessions: %{pid() => Session.t()},
+          historical_sessions: [CompletedSession.t()]
+        }
+
+  @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, %__MODULE__{}, name: @name)
   end
 
+  @spec track_session(pid(), String.t()) :: :ok
   def track_session(pid, browser_info) do
     GenServer.cast(@name, {:track_session, pid, browser_info})
   end
 
+  @spec get_stats() :: t()
   def get_stats do
     GenServer.call(@name, :get_stats)
   end

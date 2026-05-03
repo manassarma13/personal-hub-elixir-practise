@@ -14,22 +14,27 @@ defmodule PersonalHub.Chess.GameServer do
     moves: []
   ]
 
+  @spec start_link(String.t()) :: GenServer.on_start()
   def start_link(game_id) do
     GenServer.start_link(__MODULE__, game_id, name: via(game_id))
   end
 
+  @spec join(String.t(), String.t(), String.t()) :: {:ok, Chess.color()} | {:error, :game_full}
   def join(game_id, player_id, player_name) do
     GenServer.call(via(game_id), {:join, player_id, player_name})
   end
 
+  @spec move(String.t(), String.t(), Chess.position(), Chess.position()) :: {:ok, map()} | {:error, atom()}
   def move(game_id, player_id, from, to) do
     GenServer.call(via(game_id), {:move, player_id, from, to})
   end
 
+  @spec get_state(String.t()) :: map()
   def get_state(game_id) do
     GenServer.call(via(game_id), :get_state)
   end
 
+  @spec game_exists?(String.t()) :: boolean()
   def game_exists?(game_id) do
     case Registry.lookup(PersonalHub.Chess.Registry, game_id) do
       [{_pid, _}] -> true
@@ -37,6 +42,7 @@ defmodule PersonalHub.Chess.GameServer do
     end
   end
 
+  @spec create_game(String.t()) :: DynamicSupervisor.on_start_child()
   def create_game(game_id) do
     DynamicSupervisor.start_child(
       PersonalHub.Chess.GameSupervisor,
