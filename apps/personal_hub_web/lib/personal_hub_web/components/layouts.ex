@@ -137,6 +137,34 @@ defmodule PersonalHubWeb.Layouts do
                     <.icon name="hero-megaphone" class="size-5 text-teal-500" />
                     Social Composer
                   </a>
+                  <a
+                    href="/habits"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-green-600 hover:bg-green-50 transition-colors font-medium"
+                  >
+                    <.icon name="hero-calendar-days" class="size-5 text-green-500" />
+                    Habits
+                  </a>
+                  <a
+                    href="/focus"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors font-medium"
+                  >
+                    <.icon name="hero-clock" class="size-5 text-rose-500" />
+                    Focus Rooms
+                  </a>
+                  <a
+                    href="/flashcards"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-yellow-600 hover:bg-yellow-50 transition-colors font-medium"
+                  >
+                    <.icon name="hero-rectangle-stack" class="size-5 text-yellow-500" />
+                    Flashcards
+                  </a>
+                  <a
+                    href="/budget"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors font-medium"
+                  >
+                    <.icon name="hero-banknotes" class="size-5 text-blue-500" />
+                    Local Budget
+                  </a>
                 </div>
               </div>
             </details>
@@ -261,6 +289,30 @@ defmodule PersonalHubWeb.Layouts do
                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-teal-600 hover:bg-teal-50 font-medium"
                 >
                   <.icon name="hero-megaphone" class="size-5 text-teal-500" /> Social Composer
+                </a>
+                <a
+                  href="/habits"
+                  class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-green-600 hover:bg-green-50 transition-colors"
+                >
+                  <.icon name="hero-calendar-days" class="size-5 text-green-500" /> Habits
+                </a>
+                <a
+                  href="/focus"
+                  class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors"
+                >
+                  <.icon name="hero-clock" class="size-5 text-rose-500" /> Focus Rooms
+                </a>
+                <a
+                  href="/flashcards"
+                  class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-yellow-600 hover:bg-yellow-50 transition-colors"
+                >
+                  <.icon name="hero-rectangle-stack" class="size-5 text-yellow-500" /> Flashcards
+                </a>
+                <a
+                  href="/budget"
+                  class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                >
+                  <.icon name="hero-banknotes" class="size-5 text-blue-500" /> Local Budget
                 </a>
               </div>
             </div>

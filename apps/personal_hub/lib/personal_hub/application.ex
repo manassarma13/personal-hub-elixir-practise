@@ -14,6 +14,8 @@ defmodule PersonalHub.Application do
       {DynamicSupervisor, name: PersonalHub.Chess.GameSupervisor, strategy: :one_for_one},
       {Registry, keys: :unique, name: PersonalHub.Drop.Registry},
       {DynamicSupervisor, name: PersonalHub.Drop.RoomSupervisor, strategy: :one_for_one},
+      {Registry, keys: :unique, name: PersonalHub.Focus.Registry},
+      {DynamicSupervisor, name: PersonalHub.Focus.RoomSupervisor, strategy: :one_for_one},
       PersonalHub.Analytics
     ]
 

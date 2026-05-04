@@ -53,6 +53,13 @@ defmodule PersonalHubWeb.Router do
     # Social Media Composer
     live "/social", SocialLive.Index, :index
 
+    # Personal Development Features
+    live "/habits", HabitsLive.Index, :index
+    live "/focus", FocusLive.Index, :index
+    live "/focus/:id", FocusLive.Room, :index
+    live "/flashcards", FlashcardsLive.Index, :index
+    live "/budget", BudgetLive.Index, :index
+
     # Admin Analytics
     live "/admin/analytics", AnalyticsLive, :index
   end

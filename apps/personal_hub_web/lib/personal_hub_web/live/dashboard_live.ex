@@ -233,6 +233,66 @@ defmodule PersonalHubWeb.DashboardLive do
               </div>
             </div>
           </.link>
+
+          <.link
+            navigate={~p"/habits"}
+            class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-green-400 transition-all group"
+          >
+            <div class="flex items-center gap-4">
+              <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 group-hover:bg-green-100 transition-colors">
+                <.icon name="hero-calendar-days" class="size-6 text-green-600" />
+              </span>
+              <div>
+                <h3 class="font-semibold text-gray-900">Habit Tracker</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Build streaks, build yourself</p>
+              </div>
+            </div>
+          </.link>
+
+          <.link
+            navigate={~p"/focus"}
+            class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-rose-400 transition-all group"
+          >
+            <div class="flex items-center gap-4">
+              <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-rose-50 group-hover:bg-rose-100 transition-colors">
+                <.icon name="hero-clock" class="size-6 text-rose-600" />
+              </span>
+              <div>
+                <h3 class="font-semibold text-gray-900">Focus Rooms</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Multiplayer Pomodoro</p>
+              </div>
+            </div>
+          </.link>
+
+          <.link
+            navigate={~p"/flashcards"}
+            class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-yellow-400 transition-all group"
+          >
+            <div class="flex items-center gap-4">
+              <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
+                <.icon name="hero-rectangle-stack" class="size-6 text-yellow-600" />
+              </span>
+              <div>
+                <h3 class="font-semibold text-gray-900">Flashcards</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Spaced repetition learning</p>
+              </div>
+            </div>
+          </.link>
+
+          <.link
+            navigate={~p"/budget"}
+            class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-blue-400 transition-all group"
+          >
+            <div class="flex items-center gap-4">
+              <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                <.icon name="hero-banknotes" class="size-6 text-blue-600" />
+              </span>
+              <div>
+                <h3 class="font-semibold text-gray-900">Local Budget</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Private expense tracking</p>
+              </div>
+            </div>
+          </.link>
         </div>
 
         <div class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6">
