@@ -1,5 +1,7 @@
 # Personal Hub
 
+**🌍 Live Demo:** [https://187.127.172.155.sslip.io/](https://187.127.172.155.sslip.io/)
+
 A fullstack Elixir umbrella application powered by Phoenix LiveView — delivering real-time features with zero JavaScript frameworks, zero npm dependencies, and no database server.
 
 ## 1. Features
