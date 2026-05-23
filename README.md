@@ -1,25 +1,32 @@
 # Personal Hub
 
-A fullstack Elixir umbrella application powered by Phoenix LiveView — delivering 10 real-time features with zero JavaScript frameworks, zero npm dependencies, and no database server.
+A fullstack Elixir umbrella application powered by Phoenix LiveView — delivering real-time features with zero JavaScript frameworks, zero npm dependencies, and no database server.
 
-Content is persisted in the browser via localStorage. Server-side features like multiplayer chess and ephemeral text sharing leverage Elixir's OTP primitives (GenServer, DynamicSupervisor, Registry, PubSub) for lightweight, fault-tolerant concurrency.
+## 1. Features
 
-## Overview
+- **Drop**: Ephemeral real-time text sharing between devices via 6-digit room codes.
+- **Blog**: Full CRUD with publish/draft, relative timestamps, and edit history.
+- **Notes**: Quick notes with pin/unpin functionality and a responsive grid layout.
+- **Tasks**: Priority levels, status transitions, and due dates with overdue alerts.
+- **Kanban Board**: Three-column board view + monthly calendar with color-coded items.
+- **Document Viewer**: Upload and render PDF, XLSX, DOCX, and PPTX — parsed with the Erlang stdlib.
+- **Data Visualization**: Bar, line, pie, doughnut, radar, scatter, and heatmap charts.
+- **Chess**: Real-time multiplayer with game codes, move validation, and in-game chat.
+- **Typing Game**: 60-second WPM speed test with live accuracy tracking.
+- **Dashboard**: Unified overview with stats, feature cards, and quick actions.
 
-### 1. Architecture Structure (Umbrella App)
-The project is split into two main applications under the `apps/` directory, adhering to the Elixir umbrella project pattern:
-*   **`personal_hub` (Core Logic):** This contains all the backend business logic and OTP (Open Telecom Platform) supervision trees. It handles complex server-side operations like the multiplayer chess engine, ephemeral room management for text sharing, analytics tracking, and document parsing. It operates completely independently of any web-specific code.
-*   **`personal_hub_web` (Web Layer):** This is the Phoenix web application. It handles routing, LiveView components (the UI), and real-time WebSocket communication with the browser. It relies on the core `personal_hub` app for functionality.
+## 2. Tech Stack
 
-### 2. Data Storage & Flow (No Database)
-A unique aspect of this project is that it **does not use a database** (like PostgreSQL or MySQL). Instead, it manages state in two ways:
-*   **Client-Side (`localStorage`):** For features like the Blog, Notes, Tasks, and Kanban Board, the data is saved directly in the user's browser using `localStorage`. A JavaScript hook (`LocalStore`) acts as a bridge, communicating this local data back to the Elixir LiveView over WebSockets so the server can render the UI.
-*   **Server-Side Ephemeral State (OTP Processes):** For real-time and multiplayer features, Elixir's concurrency primitives are used to store state in-memory:
-    *   **GenServers:** Used to manage individual game states (e.g., a chess match) or temporary rooms (e.g., the "Drop" text sharing feature). Once a room expires or a game ends, the GenServer is terminated, and the data is wiped.
-    *   **PubSub:** Phoenix PubSub broadcasts real-time events between different users (like a chess move or a chat message).
-    *   **DynamicSupervisors & Registries:** Used to spin up new isolated processes on demand (like a new chess game) and keep track of them.
+- **Core Language**: Elixir 1.19 / Erlang OTP
+- **Web Framework**: Phoenix 1.8
+- **Real-time UI**: Phoenix LiveView 1.1
+- **Styling**: Tailwind CSS v4 + daisyUI
+- **Charts**: Chart.js 4.4.7 (vendored)
+- **Data Persistence**: Browser `localStorage` and OTP in-memory processes
+- **Document Parsing**: Erlang `:zip` + `:xmerl`
+- **HTTP Server/Client**: Bandit (Server) / Req (Client)
 
-## Features
+## 3. Architecture
 
 | Feature | Description | Storage |
 |---------|-------------|---------|
@@ -35,90 +42,52 @@ A unique aspect of this project is that it **does not use a database** (like Pos
 | **Dashboard** | Unified overview with stats, feature cards, and quick actions | — |
 | **Social Composer** | Write once, preview for X/LinkedIn/Instagram/Threads/Bluesky with character limits and one-click copy | Browser localStorage |
 
-## User Journeys
+The project adheres to the Elixir umbrella project pattern to separate concerns cleanly:
 
-### 1. The "Zero-Infrastructure" Guest
-*   **Discovery:** A user follows a link (e.g. from a LinkedIn post) to the dynamic Cloudflare URL.
-*   **Zero-Friction:** They land instantly on the Dashboard with no sign-up or database-driven delay.
-*   **Interaction:** They play a 60-second Typing Test or join a real-time Chess room.
-*   **Collaboration:** They join a **Drop** room, paste a snippet, and see it sync instantly with the owner.
-*   **Privacy:** They close the tab. No account was created, and no data was harvested.
+### Umbrella Structure
+* **`personal_hub` (Core Logic):** Contains backend business logic and OTP (Open Telecom Platform) supervision trees. It handles server-side operations like the multiplayer chess engine, ephemeral room management, analytics tracking, and document parsing independently of web-specific code.
+* **`personal_hub_web` (Web Layer):** The Phoenix web application. It handles routing, LiveView components (the UI), and real-time WebSocket communication, relying on the core `personal_hub` app for all its backend functionality.
 
-### 2. The "Private Command Center" (Owner)
-*   **Initialization:** The owner starts the home server. The app is reachable globally via a secure tunnel.
-*   **Organization:** They use **Notes** and **Kanban** for daily planning. All data is persisted in their local browser storage.
-*   **Seamless Transfer:** They use **Drop** to move text/links between their phone and desktop without using a third-party chat app.
-*   **Stateless Review:** They upload sensitive `.xlsx` or `.docx` files to the **Document Viewer** to extract text, knowing the file is never written to a persistent disk.
+### Data Storage & Flow (No Database)
+* **Client-Side (`localStorage`):** Features like Blog, Notes, Tasks, and the Kanban Board save data directly in the user's browser using `localStorage`. A JavaScript hook (`LocalStore`) bridges this local data back to the Elixir LiveView over WebSockets.
+* **Server-Side Ephemeral State (OTP Processes):** For real-time features, Elixir's concurrency primitives manage state in-memory:
+  * **GenServers** manage individual game states (e.g., a chess match) or temporary rooms.
+  * **PubSub** broadcasts real-time events between users.
+  * **DynamicSupervisors & Registries** spin up and track new isolated processes on demand.
 
-### 3. The "In-Memory" Interaction
-*   **Stateful Gaming:** Two players join a Chess game via a code. The server spawns a unique `GameServer` process.
-*   **Ephemeral Sharing:** A "Drop" room is created for a quick file/text transfer. The room auto-terminates after 10 minutes of inactivity, wiping all traces from the server's memory.
-*   **Silent Monitoring:** The owner checks session stats via the server-side analytics, which tracks visitors using process monitoring instead of client-side tracking scripts.
+## 4. Tech Usage Explained
 
-## Architecture
+- **Elixir & OTP:** Utilized to spin up thousands of lightweight, isolated, fault-tolerant processes. Instead of storing temporary chess games or sharing rooms in a database, each instance is a living process (`GenServer`) that manages its own state and automatically cleans itself up (expires) when no longer needed.
+- **Phoenix LiveView:** Allows building rich, real-time user experiences directly in Elixir. WebSockets carry diffs of HTML and user events, completely removing the need to build a distinct REST API or use heavy frontend frameworks like React or Vue.
+- **Browser localStorage via Hooks:** Bypasses the need for a heavyweight database by allowing user-specific data to live entirely on the client, synced seamlessly to the LiveView state using custom Phoenix JS hooks.
+- **Tailwind CSS & daisyUI:** Speeds up UI development by providing utility classes and pre-built components, keeping the UI looking modern and responsive without custom CSS bloat.
 
-```
-personal-hub/
-├── apps/
-│   ├── personal_hub/                  # Core business logic (no web dependencies)
-│   │   └── lib/personal_hub/
-│   │       ├── application.ex         # OTP supervisor tree
-│   │       ├── chess.ex               # Chess engine (moves, validation, checkmate)
-│   │       ├── chess/game_server.ex   # GenServer per chess game
-│   │       ├── analytics.ex           # GenServer: session stats (bounded history)
-│   │       ├── drop/room_server.ex    # GenServer per Drop room (auto-expiry)
-│   │       └── document_parser.ex     # XLSX/DOCX/PPTX via Erlang :zip + :xmerl
-│   │
-│   └── personal_hub_web/             # Phoenix web layer
-│       ├── assets/
-│       │   ├── js/app.js              # LocalStore, ChartJS hooks; header nav closes on navigate
-│       │   ├── css/app.css            # Tailwind CSS v4
-│       │   └── vendor/chart.js        # Chart.js 4.4.7 (vendored, no npm)
-│       └── lib/personal_hub_web/
-│           ├── components/            # Layouts, CoreComponents
-│           ├── helpers/               # TimeHelpers (relative time formatting)
-│           ├── hooks/                 # LiveView on_mount (e.g. analytics)
-│           └── live/                  # LiveViews (feature modules)
-├── config/                            # Environment-specific configuration
-├── docker-compose.yml                 # Local prod-style run (loads .env)
-├── .env.example                       # Template for SECRET_KEY_BASE, PHX_*, PORT
-└── Dockerfile                         # Production-ready multi-stage build
-```
+## 5. Future Enhancements for "Vibe Coding" Safety
 
-### Data Flow
+To make the app robust, maintainable, and safe for rapid iterative development (vibe coding), the following tools and practices will be implemented:
 
-```
-┌──────────────────────────────────────────────────────┐
-│                      Browser                          │
-│                                                       │
-│  localStorage ◄──► LocalStore JS Hook ◄──► LiveView   │
-│  (posts, notes,    (phx-hook bridge)       (Elixir)   │
-│   tasks)                                              │
-└────────────────────────┬──────────────────────────────┘
-                         │ WebSocket
-┌────────────────────────▼──────────────────────────────┐
-│                 Phoenix Server                         │
-│                                                        │
-│  PubSub ──── GenServer (Chess/Drop/Analytics) ──── Registry │
-│              DynamicSupervisor (process lifecycle)          │
-│              DocumentParser (Erlang :zip + :xmerl)          │
-└────────────────────────────────────────────────────────┘
-```
+- **Linting & Code Formatting:** Integrating tools like `mix format` and `Credo` to enforce strict style guidelines, catch Elixir anti-patterns early, and ensure code consistency.
+- **Code Scans (Security):** Adding `Sobelow` to detect common Phoenix security vulnerabilities, such as cross-site scripting (XSS), SQL injection, or misconfigured headers.
+- **Testing:**
+  - *Unit Testing:* Comprehensive `ExUnit` tests for core logic models (e.g., chess validation, parsing logic).
+  - *Integration Testing:* Testing LiveView rendering and state transitions upon user interaction.
+  - *End-to-End (E2E) Testing:* Utilizing tools like `Wallaby` or Cypress to simulate real user journeys across the browser.
+- **CI/CD Pipelines:** Automated workflows (e.g., GitHub Actions) that run lints, code scans, and tests on every commit, ensuring that changes are safely verified before being merged.
 
-### OTP Supervision Tree
+## 6. How to Make MD Files to Build this Application
 
-```
-PersonalHub.Supervisor
-├── DNSCluster
-├── Phoenix.PubSub (PersonalHub.PubSub)
-├── Registry (PersonalHub.Chess.Registry)
-├── DynamicSupervisor (PersonalHub.Chess.GameSupervisor)
-├── Registry (PersonalHub.Drop.Registry)
-├── DynamicSupervisor (PersonalHub.Drop.RoomSupervisor)
-└── PersonalHub.Analytics
-```
+Building a complex, stateful application requires meticulous planning. Using Markdown (`.md`) files is the core planning methodology for this architecture, focusing on three fundamental pillars:
 
-## Routes
+### A. Design Patterns
+Markdown files are used to blueprint the design patterns *before* writing code. For example, sketching out the OTP Supervision Tree or deciding which GenServers belong under a DynamicSupervisor. We define process boundaries, pub-sub topics, and communication protocols (e.g., `handle_call` vs `handle_cast`) in plain text to ensure the system architecture is sound.
+
+### B. Data Structures
+Before implementing a feature, we use markdown to explicitly define the state representation. For example, defining the `%GameState{}` struct for Chess or the `%Room{}` struct for Drop. We write down the exact typespecs, what each key represents, and how the data will mutate over time. This acts as our single source of truth for the domain model.
+
+### C. Dynamic Programming & Algorithms
+For complex logic, such as evaluating legal chess moves (sliding pieces, checkmate detection) or optimizing document parsing, we write out the algorithms in markdown pseudocode. Breaking down a complex problem into sub-problems (dynamic programming) in a human-readable document makes it significantly easier to translate into functional Elixir pipelines and recursive functions later.
+
+### Routes
 
 | Route | LiveView | Feature |
 |-------|----------|---------|
@@ -136,21 +105,21 @@ PersonalHub.Supervisor
 | `/social` | `SocialLive.Index` | Social media composer |
 | `/admin/analytics` | `AnalyticsLive` | Real-time visitor analytics |
 
-## Tech Stack
+This "Documentation-Driven Development" ensures that all edge cases, state transitions, and process lifecycles are resolved abstractly, leading to faster, more confident coding.
 
-| Layer | Technology |
-|-------|-----------|
-| Language | Elixir 1.19 / Erlang OTP (see `Dockerfile` pins, e.g. OTP 26.x) |
-| Web Framework | Phoenix 1.8 |
-| Real-time UI | Phoenix LiveView 1.1 |
-| Styling | Tailwind CSS v4 + daisyUI |
-| Charts | Chart.js 4.4.7 (vendored) |
-| Persistence | Browser localStorage / OTP processes |
-| Document Parsing | Erlang `:zip` + `:xmerl` |
-| HTTP Client | Req |
-| HTTP Server | Bandit |
+## 7. Real-Time Connectivity Scenario: Multiplayer Chess
 
-## Getting Started
+To illustrate how users (nodes) connect and interact in real-time without a database, consider the multiplayer Chess and in-game chat feature:
+
+1. **Initiation:** Player A creates a new Chess game. The Phoenix backend uses a `DynamicSupervisor` to spawn a new, isolated `GenServer` process dedicated solely to this match. The `Registry` maps a unique 6-digit room code to this specific process.
+2. **Connection:** Player B enters the 6-digit code. Their LiveView process uses the `Registry` to locate the exact `GenServer` managing Player A's game and connects to it.
+3. **State Management:** Both players maintain independent WebSocket connections to their own LiveView processes, but both LiveViews query the *same* backend `GenServer` to retrieve the current board state and chat history.
+4. **Real-Time Updates (PubSub):** When Player A makes a move or sends a chat message, the `GenServer` validates the action and uses `Phoenix.PubSub` to broadcast an event (e.g., `"chess_move"` or `"chat_message"`) to the room's specific topic.
+5. **Synchronization:** Player B's LiveView, which is subscribed to this PubSub topic, instantly receives the event, updates its local UI state, and pushes the visual changes to Player B's browser. This process happens in milliseconds, living entirely in server memory.
+
+---
+
+### Getting Started (Development)
 
 ```bash
 # Install dependencies
@@ -162,30 +131,15 @@ mix phx.server
 
 Open [http://localhost:4000](http://localhost:4000). No database setup required.
 
-Optional project-root **`.env`**: `config/dev.exs` loads it so you can set `SECRET_KEY_BASE` or other vars without exporting them in the shell. Copy **`.env.example`** to **`.env`** and edit.
-
-If **port 4000 is already in use** (e.g. Docker still running), stop the other process or run:
-
 ```bash
-PORT=4001 mix phx.server
-```
-
-## Development
-
-```bash
-# Compile, format, and run tests (run before every commit)
+# Compile, format, and run tests
 mix precommit
-
-# Run tests
-mix test
-
-# Run previously failed tests only
-mix test --failed
 ```
 
 ## Deployment
 
 **Required in production:** `SECRET_KEY_BASE` (at least 64 bytes — use `mix phx.gen.secret`).
+> **What is `SECRET_KEY_BASE`?** In Phoenix, this is a critical security parameter used to cryptographically sign and encrypt cookies and other session data. Without a secure, unpredictable key, malicious actors could tamper with the session state. You must generate a unique key for your production environment to keep user connections secure.
 
 **Recommended:** `PHX_HOST` (public hostname). For HTTP behind no TLS (e.g. local Docker), set `PHX_SCHEME=http`, `PHX_PUBLIC_PORT`, and `PORT` to match the URL users open (see **`config/runtime.exs`** and **`.env.example`**).
 

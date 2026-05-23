@@ -103,3 +103,24 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* ── Chat Bubble Animations ────────────────────────────────── */
+@keyframes bubble-pop-in {
+  0%   { transform: scale(0); opacity: 0; }
+  50%  { transform: scale(1.15); opacity: 1; }
+  70%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bubble-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+
+.chat-bubble-float {
+  animation: bubble-pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.chat-bubble-pulse {
+  animation: bubble-pulse 1.5s ease-in-out infinite;
+}

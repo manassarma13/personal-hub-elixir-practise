@@ -4,6 +4,13 @@ defmodule PersonalHubWeb.ChessLive.Index do
   alias PersonalHub.Chess
   alias PersonalHub.Chess.GameServer
 
+  # Curated palette of 12 vibrant colors for chat bubbles
+  @bubble_colors [
+    "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e",
+    "#f97316", "#eab308", "#22c55e", "#14b8a6",
+    "#06b6d4", "#3b82f6", "#a855f7", "#e11d48"
+  ]
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
@@ -19,6 +26,8 @@ defmodule PersonalHubWeb.ChessLive.Index do
      |> assign(valid_moves: [])
      |> assign(join_code: "")
      |> assign(chat_input: "")
+     |> assign(chat_minimized: false)
+     |> assign(unread_count: 0)
      |> stream(:chat_messages, [])}
   end
 
@@ -156,6 +165,13 @@ defmodule PersonalHubWeb.ChessLive.Index do
   end
 
   @impl true
+  def handle_event("toggle_chat", _params, socket) do
+    minimized = !socket.assigns.chat_minimized
+    unread = if minimized, do: socket.assigns.unread_count, else: 0
+    {:noreply, assign(socket, chat_minimized: minimized, unread_count: unread)}
+  end
+
+  @impl true
   def handle_event("back_to_menu", _params, socket) do
     if socket.assigns.game_id do
       Phoenix.PubSub.unsubscribe(PersonalHub.PubSub, "chess:#{socket.assigns.game_id}")
@@ -169,6 +185,8 @@ defmodule PersonalHubWeb.ChessLive.Index do
      |> assign(selected: nil)
      |> assign(valid_moves: [])
      |> assign(player_color: nil)
+     |> assign(chat_minimized: false)
+     |> assign(unread_count: 0)
      |> stream(:chat_messages, [], reset: true)}
   end
 
@@ -185,6 +203,14 @@ defmodule PersonalHubWeb.ChessLive.Index do
   @impl true
   def handle_info({:chat_message, from, text}, socket) do
     msg = %{id: System.unique_integer([:positive, :monotonic]), from: from, text: text}
+
+    socket =
+      if socket.assigns.chat_minimized and from != socket.assigns.player_name do
+        assign(socket, unread_count: socket.assigns.unread_count + 1)
+      else
+        socket
+      end
+
     {:noreply, stream_insert(socket, :chat_messages, msg)}
   end
 
@@ -201,6 +227,29 @@ defmodule PersonalHubWeb.ChessLive.Index do
   defp generate_code do
     for _ <- 1..6, into: "", do: <<Enum.random(~c"ABCDEFGHJKLMNPQRSTUVWXYZ23456789")>>
   end
+
+  defp opponent_name(game, player_color) do
+    case player_color do
+      :white -> game.black_player && elem(game.black_player, 1)
+      :black -> game.white_player && elem(game.white_player, 1)
+      _ -> nil
+    end
+  end
+
+  defp bubble_color(nil), do: Enum.at(@bubble_colors, 0)
+
+  defp bubble_color(name) do
+    index =
+      name
+      |> to_charlist()
+      |> Enum.sum()
+      |> rem(length(@bubble_colors))
+
+    Enum.at(@bubble_colors, index)
+  end
+
+  defp user_initial(nil), do: "?"
+  defp user_initial(name), do: name |> String.trim() |> String.first() |> String.upcase()
 
   defp square_color(row, col) do
     if rem(row + col, 2) == 0, do: "bg-[#f0d9b5]", else: "bg-[#b58863]"
@@ -438,8 +487,18 @@ defmodule PersonalHubWeb.ChessLive.Index do
                   </div>
                 </div>
 
-                <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col">
-                  <h3 class="text-sm font-semibold text-gray-900 mb-3">Chat</h3>
+                <%!-- Chat Panel (expanded) --%>
+                <div :if={!@chat_minimized} class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold text-gray-900">Chat</h3>
+                    <button
+                      phx-click="toggle_chat"
+                      class="p-1 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                      title="Minimize chat"
+                    >
+                      <.icon name="hero-minus" class="size-4" />
+                    </button>
+                  </div>
                   <div
                     id="chat-messages"
                     phx-update="stream"
@@ -484,6 +543,34 @@ defmodule PersonalHubWeb.ChessLive.Index do
                     </button>
                   </form>
                 </div>
+              </div>
+
+              <%!-- Floating Chat Bubble (minimized) --%>
+              <% opp_name = opponent_name(@game, @player_color) %>
+              <button
+                :if={@chat_minimized}
+                phx-click="toggle_chat"
+                class={[
+                  "fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full text-white text-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer chat-bubble-float",
+                  @unread_count > 0 && "chat-bubble-pulse"
+                ]}
+                style={"background-color: #{bubble_color(opp_name)}"}
+                title={opp_name || "Chat"}
+              >
+                {user_initial(opp_name)}
+                <span
+                  :if={@unread_count > 0}
+                  class="absolute -top-1 -right-1 flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold ring-2 ring-white"
+                >
+                  {@unread_count}
+                </span>
+              </button>
+
+              <%!-- Hidden stream container when chat is minimized (preserves stream state) --%>
+              <div :if={@chat_minimized} id="chat-messages" phx-update="stream" class="hidden">
+                <%= for {id, _msg} <- @streams.chat_messages do %>
+                  <div id={id}></div>
+                <% end %>
               </div>
             </div>
           <% true -> %>
