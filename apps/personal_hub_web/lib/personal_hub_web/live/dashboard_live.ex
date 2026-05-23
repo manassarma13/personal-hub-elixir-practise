@@ -26,6 +26,11 @@ defmodule PersonalHubWeb.DashboardLive do
   end
 
   @impl true
+  def handle_event("wip", _params, socket) do
+    {:noreply, put_flash(socket, :info, "Work in Progress. No money to buy dev server")}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
@@ -234,9 +239,9 @@ defmodule PersonalHubWeb.DashboardLive do
             </div>
           </.link>
 
-          <.link
-            navigate={~p"/habits"}
-            class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-green-400 transition-all group"
+          <div
+            phx-click="wip"
+            class="cursor-pointer bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-green-400 transition-all group"
           >
             <div class="flex items-center gap-4">
               <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 group-hover:bg-green-100 transition-colors">
@@ -247,7 +252,7 @@ defmodule PersonalHubWeb.DashboardLive do
                 <p class="text-xs text-gray-500 mt-0.5">Build streaks, build yourself</p>
               </div>
             </div>
-          </.link>
+          </div>
 
           <.link
             navigate={~p"/focus"}
