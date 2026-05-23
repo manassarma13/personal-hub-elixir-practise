@@ -26,8 +26,9 @@ defmodule PersonalHubWeb.DashboardLive do
   end
 
   @impl true
-  def handle_event("wip", _params, socket) do
-    {:noreply, put_flash(socket, :info, "Work in Progress. No money to buy dev server")}
+  def handle_event("wip", params, socket) do
+    app = Map.get(params, "app", "This feature")
+    {:noreply, put_flash(socket, :info, "#{app} is currently not available. Work in Progress (No money to buy dev server!).")}
   end
 
   @impl true
@@ -225,7 +226,7 @@ defmodule PersonalHubWeb.DashboardLive do
           </.link>
 
           <div
-            phx-click="wip"
+            phx-click="wip" phx-value-app="Social Composer"
             class="cursor-pointer bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-teal-300 transition-all group"
           >
             <div class="flex items-center gap-4">
@@ -240,7 +241,7 @@ defmodule PersonalHubWeb.DashboardLive do
           </div>
 
           <div
-            phx-click="wip"
+            phx-click="wip" phx-value-app="Habit Tracker"
             class="cursor-pointer bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-green-400 transition-all group"
           >
             <div class="flex items-center gap-4">
@@ -270,7 +271,7 @@ defmodule PersonalHubWeb.DashboardLive do
           </.link>
 
           <div
-            phx-click="wip"
+            phx-click="wip" phx-value-app="Flashcards"
             class="cursor-pointer bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-yellow-400 transition-all group"
           >
             <div class="flex items-center gap-4">
