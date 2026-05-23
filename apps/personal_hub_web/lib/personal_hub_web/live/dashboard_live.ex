@@ -224,9 +224,9 @@ defmodule PersonalHubWeb.DashboardLive do
             </div>
           </.link>
 
-          <.link
-            navigate={~p"/social"}
-            class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-teal-300 transition-all group"
+          <div
+            phx-click="wip"
+            class="cursor-pointer bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-teal-300 transition-all group"
           >
             <div class="flex items-center gap-4">
               <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-50 group-hover:bg-teal-100 transition-colors">
@@ -234,10 +234,10 @@ defmodule PersonalHubWeb.DashboardLive do
               </span>
               <div>
                 <h3 class="font-semibold text-gray-900">Social Composer</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Write once, post everywhere</p>
+                <p class="text-xs text-gray-500 mt-0.5">Work in Progress</p>
               </div>
             </div>
-          </.link>
+          </div>
 
           <div
             phx-click="wip"
@@ -269,9 +269,9 @@ defmodule PersonalHubWeb.DashboardLive do
             </div>
           </.link>
 
-          <.link
-            navigate={~p"/flashcards"}
-            class="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-yellow-400 transition-all group"
+          <div
+            phx-click="wip"
+            class="cursor-pointer bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 hover:shadow-md hover:border-yellow-400 transition-all group"
           >
             <div class="flex items-center gap-4">
               <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
@@ -279,10 +279,10 @@ defmodule PersonalHubWeb.DashboardLive do
               </span>
               <div>
                 <h3 class="font-semibold text-gray-900">Flashcards</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Spaced repetition learning</p>
+                <p class="text-xs text-gray-500 mt-0.5">Work in Progress</p>
               </div>
             </div>
-          </.link>
+          </div>
 
           <.link
             navigate={~p"/budget"}

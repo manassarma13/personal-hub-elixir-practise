@@ -161,6 +161,43 @@ docker compose up --build
 
 Refer to **`Ship.md`** (local-only; not in git if you keep it untracked) for VPS notes if you use that workflow.
 
+## 8. Feature Low-Level Designs (LLD)
+
+### 1. Drop (Ephemeral Text Sharing)
+- **Architecture**: Isolated `GenServer` per room, managed by a `DynamicSupervisor`.
+- **Data Structure**: `%Drop.Room{code: String.t(), content: String.t(), expires_at: DateTime.t()}`
+- **Flow**: User enters a 6-digit code -> LiveView queries `Registry` for the PID -> Connects to GenServer -> Subscribes to `Phoenix.PubSub` topic `"drop:<code>"`. GenServer broadcasts diffs on keystrokes and auto-terminates after 24h.
+
+### 2. Client-Side Features (Blog, Notes, Tasks, Kanban)
+- **Architecture**: Stateless backend relying on Browser `localStorage` via Phoenix JS Hooks.
+- **Data Structure**: Standardized JSON maps representing `%Post{}`, `%Note{}`, or `%Task{}`.
+- **Flow**: Page loads -> Hook reads local storage -> Pushes `ls:loaded` event over WebSocket -> LiveView updates `assigns`. Any UI mutations trigger a `push_event` back to the Hook to persist the change locally.
+
+### 3. Document Viewer (PDF, DOCX, XLSX, PPTX)
+- **Architecture**: Stateless file processing using Erlang standard libraries (`:zip`, `:xmerl`).
+- **Flow**: User uploads file via LiveView `live_file_input` -> File is chunked and stored in a temporary `/tmp` directory -> Elixir parses the XML/Archive structure -> Extracts raw text -> Pushes string to frontend UI -> Temp file is immediately garbage collected.
+
+### 4. Data Visualization
+- **Architecture**: LiveView pushing shape data to a vendored `Chart.js` client hook.
+- **Flow**: Elixir calculates the statistics (or parses uploaded JSON/CSV) -> Calls `push_event("render-chart", %{labels: [...], datasets: [...]})` -> The JavaScript Hook intercepts this and calls `chart.update()`, keeping the heavy JS logic isolated to the client.
+
+### 5. Multiplayer Chess
+- **Architecture**: Stateful OTP backend using `GenServer` for game logic and move validation.
+- **Data Structure**: `%Chess.GameState{board: map(), turn: :white | :black, players: list(), history: list(), status: :active | :checkmate}`
+- **Flow**: 
+  1. Game created -> `DynamicSupervisor` spawns a new match process.
+  2. Players join -> LiveViews subscribe to `"chess_game:<id>"`.
+  3. Move attempted -> LiveView sends `handle_event` -> Backend calculates sliding paths and checks for collisions/check -> If valid, state mutates and broadcasts new board to both clients.
+
+### 6. Typing Game
+- **Architecture**: Pure server-side state evaluation.
+- **Data Structure**: `%Typing.Session{target_text: String.t(), input: String.t(), start_time: DateTime.t(), errors: integer()}`
+- **Flow**: Tracks `phx-window-keyup` events. The LiveView process calculates accuracy and WPM on every keystroke by diffing the input string against the target text, relying on Elixir's fast string matching.
+
+### 7. Dashboard
+- **Architecture**: Aggregation layer.
+- **Flow**: Receives events from the `LocalStore` hook containing the array lengths of all local data (posts, notes) and merges it into a unified summary UI without needing a database query.
+
 ## License
 
 Private project. All rights reserved.
