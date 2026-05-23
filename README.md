@@ -28,6 +28,7 @@ A fullstack Elixir umbrella application powered by Phoenix LiveView — deliveri
 
 ## 3. Architecture
 
+<<<<<<< HEAD
 | Feature | Description | Storage |
 |---------|-------------|---------|
 | **Drop** | Ephemeral real-time text sharing between devices via 6-digit room codes | In-memory GenServer (auto-expires) |
@@ -41,7 +42,7 @@ A fullstack Elixir umbrella application powered by Phoenix LiveView — deliveri
 | **Typing Game** | 60-second WPM speed test with live accuracy tracking | Client-side |
 | **Dashboard** | Unified overview with stats, feature cards, and quick actions | — |
 | **Social Composer** | Write once, preview for X/LinkedIn/Instagram/Threads/Bluesky with character limits and one-click copy | Browser localStorage |
-
+=======
 The project adheres to the Elixir umbrella project pattern to separate concerns cleanly:
 
 ### Umbrella Structure
@@ -60,7 +61,7 @@ The project adheres to the Elixir umbrella project pattern to separate concerns 
 - **Elixir & OTP:** Utilized to spin up thousands of lightweight, isolated, fault-tolerant processes. Instead of storing temporary chess games or sharing rooms in a database, each instance is a living process (`GenServer`) that manages its own state and automatically cleans itself up (expires) when no longer needed.
 - **Phoenix LiveView:** Allows building rich, real-time user experiences directly in Elixir. WebSockets carry diffs of HTML and user events, completely removing the need to build a distinct REST API or use heavy frontend frameworks like React or Vue.
 - **Browser localStorage via Hooks:** Bypasses the need for a heavyweight database by allowing user-specific data to live entirely on the client, synced seamlessly to the LiveView state using custom Phoenix JS hooks.
-- **Tailwind CSS & daisyUI:** Speeds up UI development by providing utility classes and pre-built components, keeping the UI looking modern and responsive without custom CSS bloat.
+- **Tailwind CSS & daisyUI:** Speeds up UI deUnified overview with stats, feature cards, and quick actions.velopment by providing utility classes and pre-built components, keeping the UI looking modern and responsive without custom CSS bloat.
 
 ## 5. Future Enhancements for "Vibe Coding" Safety
 
@@ -84,11 +85,7 @@ Markdown files are used to blueprint the design patterns *before* writing code. 
 ### B. Data Structures
 Before implementing a feature, we use markdown to explicitly define the state representation. For example, defining the `%GameState{}` struct for Chess or the `%Room{}` struct for Drop. We write down the exact typespecs, what each key represents, and how the data will mutate over time. This acts as our single source of truth for the domain model.
 
-### C. Dynamic Programming & Algorithms
-For complex logic, such as evaluating legal chess moves (sliding pieces, checkmate detection) or optimizing document parsing, we write out the algorithms in markdown pseudocode. Breaking down a complex problem into sub-problems (dynamic programming) in a human-readable document makes it significantly easier to translate into functional Elixir pipelines and recursive functions later.
-
-### Routes
-
+<<<<<<< HEAD
 | Route | LiveView | Feature |
 |-------|----------|---------|
 | `/` | `DashboardLive` | Dashboard |
@@ -104,6 +101,9 @@ For complex logic, such as evaluating legal chess moves (sliding pieces, checkma
 | `/typing` | `TypingLive.Index` | Typing game |
 | `/social` | `SocialLive.Index` | Social media composer |
 | `/admin/analytics` | `AnalyticsLive` | Real-time visitor analytics |
+=======
+### C. Dynamic Programming & Algorithms
+For complex logic, such as evaluating legal chess moves (sliding pieces, checkmate detection) or optimizing document parsing, we write out the algorithms in markdown pseudocode. Breaking down a complex problem into sub-problems (dynamic programming) in a human-readable document makes it significantly easier to translate into functional Elixir pipelines and recursive functions later.
 
 This "Documentation-Driven Development" ensures that all edge cases, state transitions, and process lifecycles are resolved abstractly, leading to faster, more confident coding.
 
@@ -131,7 +131,7 @@ mix phx.server
 
 Open [http://localhost:4000](http://localhost:4000). No database setup required.
 
-```bash
+```bashUnified overview with stats, feature cards, and quick actions.
 # Compile, format, and run tests
 mix precommit
 ```
