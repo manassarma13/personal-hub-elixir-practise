@@ -1,0 +1,23 @@
+# Dev: docker compose -f docker-compose.dev.yml up --build
+# Source code is mounted as a volume so changes auto-reload.
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+      - deps:/app/deps
+      - build:/app/_build
+    environment:
+      MIX_ENV: dev
+      PHX_HOST: localhost
+      PORT: "4000"
+      SECRET_KEY_BASE: "dev-only-secret-key-base-that-is-at-least-64-bytes-long-for-phoenix-to-accept"
+
+volumes:
+  deps:
+  build:

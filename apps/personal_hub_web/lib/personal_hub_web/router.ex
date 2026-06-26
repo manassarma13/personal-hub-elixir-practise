@@ -60,6 +60,9 @@ defmodule PersonalHubWeb.Router do
     live "/flashcards", FlashcardsLive.Index, :index
     live "/budget", BudgetLive.Index, :index
 
+    # Public Blog View
+    live "/blog/:id", BlogLive.Show, :show
+
     # Admin Analytics
     live "/admin/analytics", AnalyticsLive, :index
   end

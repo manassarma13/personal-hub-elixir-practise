@@ -1,6 +1,6 @@
 # Personal Hub
 
-**🌍 Live Demo:** [https://187.127.172.155.sslip.io/](https://187.127.172.155.sslip.io/)
+**🌍 Live Demo:** [https://hub.smgstation.com/](https://hub.smgstation.com/)
 
 A fullstack Elixir umbrella application powered by Phoenix LiveView — delivering real-time features with zero JavaScript frameworks, zero npm dependencies, and no database server.
 

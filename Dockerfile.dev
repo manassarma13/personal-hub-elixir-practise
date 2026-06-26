@@ -1,0 +1,19 @@
+# Development Dockerfile — runs mix phx.server with live code reloading
+ARG ELIXIR_VERSION=1.19.4
+ARG OTP_VERSION=26.2.5.18
+ARG DEBIAN_VERSION=bookworm-20260223-slim
+
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+
+FROM ${BUILDER_IMAGE}
+
+RUN apt-get update -y && apt-get install -y build-essential git inotify-tools \
+    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
+WORKDIR /app
+
+RUN mix local.hex --force && mix local.rebar --force
+
+ENV MIX_ENV=dev
+
+CMD ["sh", "-c", "mix deps.get && mix phx.server"]

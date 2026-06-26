@@ -69,11 +69,118 @@ const LocalStore = {
   }
 }
 
+const BlogEditor = {
+  mounted() {
+    this.textarea = this.el.querySelector("#blog-textarea")
+    if (!this.textarea) return
+
+    // Handle toolbar insertion events from the server
+    this.handleEvent("blog:insert", (payload) => {
+      const ta = this.textarea
+      const start = ta.selectionStart
+      const end = ta.selectionEnd
+      const text = ta.value
+      const selected = text.substring(start, end)
+
+      let newText, cursorPos
+
+      switch (payload.type) {
+        case "wrap":
+          newText = text.substring(0, start) + payload.before + (selected || "text") + payload.after + text.substring(end)
+          cursorPos = selected ? start + payload.before.length + selected.length + payload.after.length : start + payload.before.length + 4 + payload.after.length
+          break
+
+        case "prefix":
+          // Insert at the beginning of the current line
+          const lineStart = text.lastIndexOf("\n", start - 1) + 1
+          newText = text.substring(0, lineStart) + payload.prefix + text.substring(lineStart)
+          cursorPos = start + payload.prefix.length
+          break
+
+        case "block":
+          const blockText = selected || "code here"
+          newText = text.substring(0, start) + "\n" + payload.syntax + blockText + "\n```\n" + text.substring(end)
+          cursorPos = start + 1 + payload.syntax.length + blockText.length
+          break
+
+        case "insert":
+          newText = text.substring(0, start) + payload.text + text.substring(end)
+          cursorPos = start + payload.text.length
+          break
+
+        default:
+          return
+      }
+
+      ta.value = newText
+      ta.selectionStart = ta.selectionEnd = cursorPos
+      ta.focus()
+
+      // Trigger LiveView change event
+      ta.dispatchEvent(new Event("input", { bubbles: true }))
+      this.pushEventTo(this.el, "preview_update", { body: ta.value })
+    })
+
+    // Tab key → insert 2 spaces instead of focus change
+    this.textarea.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault()
+        const ta = e.target
+        const start = ta.selectionStart
+        ta.value = ta.value.substring(0, start) + "  " + ta.value.substring(ta.selectionEnd)
+        ta.selectionStart = ta.selectionEnd = start + 2
+      }
+
+      // Enter key: auto-continue lists
+      if (e.key === "Enter") {
+        const ta = e.target
+        const pos = ta.selectionStart
+        const beforeCursor = ta.value.substring(0, pos)
+        const currentLine = beforeCursor.split("\n").pop()
+
+        // Check for list patterns
+        const ulMatch = currentLine.match(/^(\s*[-*+]\s)/)
+        const olMatch = currentLine.match(/^(\s*\d+\.\s)/)
+
+        if (ulMatch && currentLine.trim() === ulMatch[0].trim()) {
+          // Empty list item → remove it
+          e.preventDefault()
+          const lineStart = beforeCursor.lastIndexOf("\n") + 1
+          ta.value = ta.value.substring(0, lineStart) + "\n" + ta.value.substring(pos)
+          ta.selectionStart = ta.selectionEnd = lineStart + 1
+        } else if (ulMatch) {
+          e.preventDefault()
+          const prefix = ulMatch[1]
+          ta.value = ta.value.substring(0, pos) + "\n" + prefix + ta.value.substring(pos)
+          ta.selectionStart = ta.selectionEnd = pos + 1 + prefix.length
+        } else if (olMatch && currentLine.trim() === olMatch[0].trim()) {
+          e.preventDefault()
+          const lineStart = beforeCursor.lastIndexOf("\n") + 1
+          ta.value = ta.value.substring(0, lineStart) + "\n" + ta.value.substring(pos)
+          ta.selectionStart = ta.selectionEnd = lineStart + 1
+        } else if (olMatch) {
+          e.preventDefault()
+          const num = parseInt(currentLine.match(/\d+/)[0]) + 1
+          const indent = currentLine.match(/^(\s*)/)[1]
+          const prefix = `${indent}${num}. `
+          ta.value = ta.value.substring(0, pos) + "\n" + prefix + ta.value.substring(pos)
+          ta.selectionStart = ta.selectionEnd = pos + 1 + prefix.length
+        }
+      }
+    })
+
+    // Send preview updates on input
+    this.textarea.addEventListener("input", () => {
+      this.pushEventTo(this.el, "preview_update", { body: this.textarea.value })
+    })
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks, ChartJS, LocalStore},
+  hooks: {...colocatedHooks, ChartJS, LocalStore, BlogEditor},
 })
 
 // Show progress bar on live navigation and form submits
